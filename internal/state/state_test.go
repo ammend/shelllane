@@ -20,7 +20,12 @@ func TestPrepareIsolatedState(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, path := range []string{paths.Home, paths.Config, paths.Data, paths.State, paths.Workspace, paths.Cache, paths.Tmp} {
+	for _, path := range []string{
+		paths.Home, paths.Config, paths.Data, paths.State, paths.Workspace, paths.Cache, paths.Tmp,
+		filepath.Join(paths.Home, ".config"),
+		filepath.Join(paths.Home, ".local", "share"),
+		filepath.Join(paths.Home, ".cache"),
+	} {
 		info, err := os.Stat(path)
 		if err != nil {
 			t.Fatal(err)

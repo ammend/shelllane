@@ -66,6 +66,12 @@ func Prepare(cfg config.StateConfig, runtime config.Runtime, target config.Targe
 	for _, path := range []string{
 		paths.Home, paths.Config, paths.Data, paths.State, paths.Credentials,
 		paths.Workspace, paths.Cache, paths.Tmp,
+		// Docker otherwise creates these nested bind-mount targets as root.
+		// Preparing them here preserves the ShellLane service account's
+		// ownership when the daemon runs with greater privileges.
+		filepath.Join(paths.Home, ".config"),
+		filepath.Join(paths.Home, ".local", "share"),
+		filepath.Join(paths.Home, ".cache"),
 	} {
 		if err := secureMkdirAll(cfg.Root, path); err != nil {
 			return Paths{}, fmt.Errorf("state_prepare_failed: %w", err)
