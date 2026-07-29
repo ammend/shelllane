@@ -249,7 +249,7 @@ runtimes:
     image: ghcr.io/example/runtime@sha256:immutable-digest
     platform: linux/amd64
     user: "1000:1000"
-    pullPolicy: if-not-present
+    pullPolicy: missing
     workdir: /workspace
     network: restricted
     readOnly: true
@@ -281,7 +281,7 @@ runtimes:
 | `image` | none | Required image; pin a digest in production. |
 | `platform` | engine default | Optional image platform. |
 | `user` | image default | Container UID/GID; configure a non-root value. |
-| `pullPolicy` | `if-not-present` | Passed to the container engine. |
+| `pullPolicy` | `missing` | `always`, `missing`, or `never`; passed to the container engine. |
 | `workdir` | `/workspace` | Container working directory. |
 | `network` | engine default | Use `restricted` for `--network none`, or an engine network name. |
 | `readOnly` | `false` | Make the container root filesystem read-only. |
@@ -300,6 +300,8 @@ home/config/data/cache/workspace, drops all capabilities, enables
 
 Do not place secrets in `passEnv`; mount a narrowly scoped credentials path
 read-only instead. Ensure host directory ownership matches the container UID.
+The simplest deployment is to run ShellLane under a dedicated service UID and
+configure the container with that same numeric `user: "UID:GID"`.
 
 ## `targets`
 

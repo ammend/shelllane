@@ -18,6 +18,7 @@ import (
 	"github.com/ammend/shelllane/internal/identity"
 	"github.com/ammend/shelllane/internal/invocation"
 	"github.com/ammend/shelllane/internal/routing"
+	"golang.org/x/term"
 )
 
 var Version = "dev"
@@ -34,15 +35,12 @@ type App struct {
 
 func New() *App {
 	return &App{
-		Stdout:  os.Stdout,
-		Stderr:  os.Stderr,
-		Getenv:  os.Getenv,
-		Environ: os.Environ,
-		Getwd:   os.Getwd,
-		IsTTY: func() bool {
-			info, err := os.Stdin.Stat()
-			return err == nil && info.Mode()&os.ModeCharDevice != 0
-		},
+		Stdout:    os.Stdout,
+		Stderr:    os.Stderr,
+		Getenv:    os.Getenv,
+		Environ:   os.Environ,
+		Getwd:     os.Getwd,
+		IsTTY:     func() bool { return term.IsTerminal(int(os.Stdin.Fd())) },
 		NewRunner: executor.New,
 	}
 }

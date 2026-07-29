@@ -210,7 +210,7 @@ func (c *Config) defaults() {
 				runtime.Engine = "docker"
 			}
 			if runtime.PullPolicy == "" {
-				runtime.PullPolicy = "if-not-present"
+				runtime.PullPolicy = "missing"
 			}
 			if runtime.Profile == "" {
 				runtime.Profile = name
@@ -317,6 +317,11 @@ func (c *Config) Validate() error {
 			}
 			if runtime.Engine != "docker" && runtime.Engine != "podman" {
 				problems = append(problems, fmt.Sprintf("runtime %q engine must be docker or podman", name))
+			}
+			switch runtime.PullPolicy {
+			case "always", "missing", "never":
+			default:
+				problems = append(problems, fmt.Sprintf("runtime %q pullPolicy must be always, missing, or never", name))
 			}
 			for i, mount := range runtime.Mounts {
 				if mount.Source == "" || filepath.IsAbs(mount.Source) || filepath.Clean(mount.Source) == ".." || strings.HasPrefix(filepath.Clean(mount.Source), "../") {

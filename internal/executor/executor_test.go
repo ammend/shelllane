@@ -16,7 +16,7 @@ func TestContainerArgsAreIsolatedAndAllowlisted(t *testing.T) {
 	paths := state.Paths{Root: root}
 	runtime := config.Runtime{
 		Type: "container", Profile: "default", Image: "example/shelllane@sha256:abc",
-		PullPolicy: "never", Workdir: "/workspace", ReadOnly: true,
+		PullPolicy: "never", Workdir: "/workspace", ReadOnly: true, Network: "restricted",
 		PassEnv:   []string{"TERM", "SHELLLANE_CONTEXT_*"},
 		Resources: config.ResourceConfig{CPUs: "1", Memory: "1g", PIDs: 128},
 	}
@@ -28,7 +28,7 @@ func TestContainerArgsAreIsolatedAndAllowlisted(t *testing.T) {
 	joined := strings.Join(args, "\x00")
 	for _, required := range []string{
 		"--read-only", "--cap-drop\x00ALL", "no-new-privileges",
-		"TERM=xterm", "SHELLLANE_CONTEXT_REQUEST=user", "example/shelllane@sha256:abc",
+		"--network\x00none", "TERM=xterm", "SHELLLANE_CONTEXT_REQUEST=user", "example/shelllane@sha256:abc",
 	} {
 		if !strings.Contains(joined, required) {
 			t.Fatalf("missing %q in %#v", required, args)

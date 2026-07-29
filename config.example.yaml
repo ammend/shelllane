@@ -65,7 +65,7 @@ runtimes:
     # Pin a digest in production.
     image: ghcr.io/example/shelllane-runtime@sha256:replace-me
     user: "1000:1000"
-    pullPolicy: if-not-present
+    pullPolicy: missing
     workdir: /workspace
     network: restricted
     readOnly: true
