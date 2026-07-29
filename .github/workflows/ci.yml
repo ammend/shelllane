@@ -19,4 +19,5 @@ jobs:
           cache: true
       - run: make check
       - run: make integration
+      - run: make docker-integration
       - run: go build -trimpath ./cmd/shelllane
