@@ -1,0 +1,23 @@
+version: 1
+shells:
+  sh: /bin/sh
+identity:
+  env: BOTMUX_OWNER_OPEN_ID
+  argvEnvFallback: true
+  required: true
+state:
+  root: STATE_ROOT
+routes:
+  - target: default
+nodes:
+  local:
+    connector: local
+runtimes:
+  host:
+    type: host
+targets:
+  default:
+    node: local
+    runtime: host
+audit:
+  path: AUDIT_PATH
