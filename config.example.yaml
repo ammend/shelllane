@@ -1,0 +1,100 @@
+version: 1
+
+shells:
+  bash: /bin/bash
+  zsh: /bin/zsh
+  sh: /bin/sh
+
+identity:
+  env: SHELLLANE_IDENTITY
+  argvEnvFallback: true
+  required: true
+  hash: sha256
+
+state:
+  root: /var/lib/shelllane/users
+
+# First match wins. The final route must be the default route.
+routes:
+  - match:
+      identityIn:
+        - admin@example
+    target: service-host
+  - match:
+      identityIn:
+        - developer@example
+    target: developer-machine
+  - target: ordinary-users
+
+nodes:
+  service:
+    connector: local
+  developer:
+    connector: ssh
+    address: devbox.example.internal
+    user: shelllane
+    port: 22
+    helper: /usr/local/bin/shelllane
+  worker-a:
+    connector: ssh
+    address: worker-a.example.internal
+    user: shelllane
+  worker-b:
+    connector: ssh
+    address: worker-b.example.internal
+    user: shelllane
+
+nodePools:
+  ordinary-workers:
+    nodes: [worker-a, worker-b]
+    strategy: rendezvous-hash
+    storage: local
+    hashSeed: replace-with-a-stable-non-secret-value
+
+runtimes:
+  host:
+    type: host
+    profile: host
+    stateMode: isolated
+    workdir: "{workspace}"
+  sandbox:
+    type: container
+    profile: sandbox-v1
+    stateMode: isolated
+    engine: docker
+    # Pin a digest in production.
+    image: ghcr.io/example/shelllane-runtime@sha256:replace-me
+    user: "1000:1000"
+    pullPolicy: if-not-present
+    workdir: /workspace
+    network: restricted
+    readOnly: true
+    resources:
+      cpus: "2"
+      memory: 4g
+      pids: 512
+    passEnv:
+      - TERM
+      - COLORTERM
+      - LANG
+      - LC_*
+      - SHELLLANE_CONTEXT_*
+      - HTTP_PROXY
+      - HTTPS_PROXY
+      - NO_PROXY
+
+targets:
+  service-host:
+    node: service
+    runtime: host
+    # Explicit opt-out for a trusted administrator only.
+    stateMode: existing-home
+  developer-machine:
+    node: developer
+    runtime: host
+  ordinary-users:
+    nodePool: ordinary-workers
+    runtime: sandbox
+
+audit:
+  path: /var/log/shelllane/audit.jsonl
