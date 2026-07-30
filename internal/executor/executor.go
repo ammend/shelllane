@@ -30,6 +30,11 @@ func New(cfg *config.Config) *Runner {
 }
 
 func (r *Runner) Execute(res routing.Resolution, id identity.Identity, shellKind string, args, environment []string, cwd, requestID string, tty bool) error {
+	stateKey, err := state.IdentityKey(r.Config.State, id)
+	if err != nil {
+		return err
+	}
+	id.StateKey = stateKey
 	// Identity is routing metadata and user context. Always preserve both the
 	// canonical and mapped names across container and SSH allowlist boundaries.
 	res.Runtime.PassEnv = appendIdentityEnv(res.Runtime.PassEnv, identity.EnvNames(r.Config.Identity))
@@ -62,7 +67,11 @@ func (r *Runner) ExecuteRemote(request invocation.Request) error {
 	if !ok {
 		return fmt.Errorf("runtime_unavailable: remote runtime %q is not configured", request.Runtime)
 	}
-	id := identity.Identity{Hash: request.IdentityHash, Source: "remote-request"}
+	id := identity.Identity{Hash: request.IdentityHash, StateKey: request.IdentityKey, Source: "remote-request"}
+	if id.StateKey == "" {
+		// Compatibility with requests emitted before identity_key was added.
+		id.StateKey = request.IdentityHash
+	}
 	target := config.Target{Runtime: request.Runtime, StateMode: request.StateMode}
 	env := environmentMapToSlice(request.Env)
 	return r.executeLocal(runtime, target, id, request.ShellKind, request.Args, env, request.Cwd, request.RequestID, request.TTY)
@@ -233,6 +242,7 @@ func (r *Runner) executeSSH(res routing.Resolution, id identity.Identity, shellK
 		Version:      1,
 		RequestID:    requestID,
 		IdentityHash: id.Hash,
+		IdentityKey:  id.StateKey,
 		Runtime:      res.RuntimeName,
 		StateMode:    res.Target.StateMode,
 		ShellKind:    shellKind,

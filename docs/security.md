@@ -18,7 +18,9 @@ created the process.
 
 ## Defaults and controls
 
-- Identity is required and hashed before use in paths.
+- Identity is required. State paths use the configured `plain`, `base64url`, or
+  `hash` naming mode; `plain` is path-validated and `hash` offers the strongest
+  identity privacy.
 - Filesystem state is created with mode `0700`; symlinked state components are
   rejected.
 - Routes require a final default so unlisted users do not accidentally inherit

@@ -88,6 +88,27 @@ SHELLLANE_IDENTITY=user@example /path/to/bash -lc 'codex ...'
 Session ID 不是 ShellLane 必需字段。如果上层确实要传非敏感上下文，使用
 `SHELLLANE_CONTEXT_*`，并在 runtime `passEnv` 中显式允许。
 
+## 用户目录命名
+
+```yaml
+state:
+  root: /var/lib/shelllane/users
+  identityNaming: plain
+```
+
+只支持三种模式：
+
+- `plain`（默认）：目录直接使用原始身份，便于运维反查；
+- `base64url`：使用无 padding 的 URL-safe Base64，可逆且不会产生 `/`；
+- `hash`：使用不可逆 SHA-256，隐私最好。
+
+`plain` 会拒绝 `/`、`\\`、`.`、`..` 和超过 255 字节的目录名；此类身份应选择
+`base64url`，身份过长则选择 `hash`。Base64 只是编码，不是加密。无论目录使用哪种
+模式，审计和 Rendezvous Hash 调度仍使用 SHA-256。
+
+修改 `identityNaming` 会改变目录位置。已有部署升级前应保留原模式，或先迁移
+`state.root` 下的用户目录；ShellLane 不自动猜测或合并旧目录。
+
 ## 路由
 
 ```yaml

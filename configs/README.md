@@ -7,6 +7,10 @@ This repository directory contains templates, not the active runtime
 configuration. Copy one to `$XDG_CONFIG_HOME/shelllane/config.yaml` (normally
 `$HOME/.config/shelllane/config.yaml`) or `/etc/shelllane/config.yaml`.
 
+Templates explicitly use the default `state.identityNaming: plain`. Choose
+`base64url` for reversible path-safe encoding or `hash` when filesystem
+identity privacy matters. Changing modes requires migrating existing state.
+
 | File | Connector | Runtime | Use |
 | --- | --- | --- | --- |
 | [`local-host.yaml`](local-host.yaml) | local | host | Trusted local execution |

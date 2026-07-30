@@ -15,6 +15,7 @@ identity:
 state:
   # 在远端机器上创建；不是发起端目录。
   root: /var/lib/shelllane/users
+  identityNaming: plain
 
 routes:
   - target: developer-host

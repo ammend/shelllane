@@ -39,7 +39,8 @@ type IdentityConfig struct {
 }
 
 type StateConfig struct {
-	Root string `yaml:"root"`
+	Root           string `yaml:"root"`
+	IdentityNaming string `yaml:"identityNaming"`
 }
 
 type Route struct {
@@ -197,6 +198,9 @@ func (c *Config) defaults() {
 	if c.State.Root == "" {
 		c.State.Root = DefaultStateRoot
 	}
+	if c.State.IdentityNaming == "" {
+		c.State.IdentityNaming = "plain"
+	}
 	for name, node := range c.Nodes {
 		if node.Port == 0 {
 			node.Port = 22
@@ -272,6 +276,11 @@ func (c *Config) Validate() error {
 	}
 	if !filepath.IsAbs(c.State.Root) {
 		problems = append(problems, "state.root must be absolute")
+	}
+	switch c.State.IdentityNaming {
+	case "plain", "base64url", "hash":
+	default:
+		problems = append(problems, "state.identityNaming must be plain, base64url, or hash")
 	}
 	if len(c.Routes) == 0 {
 		problems = append(problems, "at least one route is required")

@@ -53,7 +53,7 @@ func TestHostPreservesArgvZeroAndIsolatesHome(t *testing.T) {
 		return nil
 	}
 	runtime := config.Runtime{Type: "host", Profile: "host", Workdir: "{workspace}"}
-	err := runner.executeLocal(runtime, config.Target{}, identity.Identity{Hash: "abc"}, "sh",
+	err := runner.executeLocal(runtime, config.Target{}, identity.Identity{Value: "alice", Hash: "abc"}, "sh",
 		[]string{"sh", "-c", "true"}, []string{"HOME=/unsafe", "SHELLLANE_INTERNAL_REQUEST=x"}, "/", "request", false)
 	if err != nil {
 		t.Fatal(err)
@@ -65,7 +65,7 @@ func TestHostPreservesArgvZeroAndIsolatesHome(t *testing.T) {
 	if strings.Contains(joined, "HOME=/unsafe") || strings.Contains(joined, "SHELLLANE_INTERNAL_REQUEST") {
 		t.Fatalf("unsafe environment retained: %s", joined)
 	}
-	if !strings.Contains(joined, "HOME="+filepath.Join(stateRoot, "abc", "profiles", "host", "home")) {
+	if !strings.Contains(joined, "HOME="+filepath.Join(stateRoot, "alice", "profiles", "host", "home")) {
 		t.Fatalf("isolated HOME missing: %s", joined)
 	}
 }

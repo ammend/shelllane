@@ -10,6 +10,7 @@ type Request struct {
 	Version      int               `json:"version"`
 	RequestID    string            `json:"request_id"`
 	IdentityHash string            `json:"identity_hash"`
+	IdentityKey  string            `json:"identity_key,omitempty"`
 	Runtime      string            `json:"runtime"`
 	StateMode    string            `json:"state_mode,omitempty"`
 	ShellKind    string            `json:"shell_kind"`

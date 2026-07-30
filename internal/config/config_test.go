@@ -34,7 +34,7 @@ func TestLoadValidAndDefaults(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if resolved != path || cfg.Identity.Hash != "sha256" || cfg.Nodes["local"].Port != 22 {
+	if resolved != path || cfg.Identity.Hash != "sha256" || cfg.State.IdentityNaming != "plain" || cfg.Nodes["local"].Port != 22 {
 		t.Fatalf("defaults not applied: %#v", cfg)
 	}
 }

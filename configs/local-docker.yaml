@@ -12,6 +12,7 @@ identity:
 
 state:
   root: /var/lib/shelllane/users
+  identityNaming: plain
 
 routes:
   - target: local-sandbox

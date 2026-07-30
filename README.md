@@ -129,6 +129,18 @@ existing environment entries unchanged. The remaining argv is exactly
 `bash -lc 'agent-cli ...'`. If environment and argv identities both exist but
 disagree, execution fails closed with `identity_conflict`.
 
+## State directory names
+
+```yaml
+state:
+  root: /var/lib/shelllane/users
+  identityNaming: plain
+```
+
+The supported modes are `plain` (default and readable), `base64url`
+(reversible, path-safe encoding), and `hash` (irreversible SHA-256). Base64 is
+not encryption. Audit and node-pool selection use SHA-256 in every mode.
+
 ## Visual guides
 
 ![SSH and container request sequence](docs/diagrams/ssh-container-sequence.png)

@@ -13,6 +13,10 @@ OS 账号、SSH、容器引擎、镜像、mount、网络和宿主机共同决定
 ShellLane 能发现 env/argv 身份冲突，但无法证明是谁创建了进程。不要把未经认证的
 HTTP 参数或用户输入直接变成身份环境变量。
 
+用户目录默认使用 `plain` 身份名，便于运维但会向能浏览 `state.root` 的人暴露身份。
+隐私敏感部署应配置 `state.identityNaming: hash`；需要可逆路径安全编码时可用
+`base64url`，但 Base64 不提供保密性。
+
 ## 推荐策略
 
 普通用户优先使用 container runtime：

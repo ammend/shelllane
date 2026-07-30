@@ -17,6 +17,7 @@ identity:
 
 state:
   root: /var/lib/shelllane/users
+  identityNaming: plain
 
 # 空 match 是默认规则，必须放在最后。
 routes:

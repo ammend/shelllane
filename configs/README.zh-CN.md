@@ -14,6 +14,10 @@ cp configs/local-host.yaml \
 常驻系统服务可由管理员安装到 `/etc/shelllane/config.yaml`。不要把仓库内模板路径
 误当成用户运行时路径。
 
+所有模板显式使用默认的 `state.identityNaming: plain`。若身份可能包含路径分隔符，
+改用可逆的 `base64url`；若文件系统中不应暴露身份，改用不可逆的 `hash`。修改模式会
+改变用户目录名，已有数据需要迁移。
+
 ## local + host
 
 使用 [`local-host.yaml`](local-host.yaml)。

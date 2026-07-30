@@ -1,6 +1,7 @@
 package state
 
 import (
+	"encoding/base64"
 	"os"
 	"path/filepath"
 	"testing"
@@ -15,7 +16,7 @@ func TestPrepareIsolatedState(t *testing.T) {
 		config.StateConfig{Root: root},
 		config.Runtime{Type: "container", Profile: "default"},
 		config.Target{},
-		identity.Identity{Hash: "abc"},
+		identity.Identity{Value: "alice", Hash: "abc"},
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -38,23 +39,55 @@ func TestPrepareIsolatedState(t *testing.T) {
 
 func TestPrepareRejectsSymlinkComponent(t *testing.T) {
 	root := t.TempDir()
-	if err := os.Mkdir(filepath.Join(root, "abc"), 0o700); err != nil {
+	if err := os.Mkdir(filepath.Join(root, "alice"), 0o700); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.Mkdir(filepath.Join(root, "outside"), 0o700); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.Symlink(filepath.Join(root, "outside"), filepath.Join(root, "abc", "profiles")); err != nil {
+	if err := os.Symlink(filepath.Join(root, "outside"), filepath.Join(root, "alice", "profiles")); err != nil {
 		t.Fatal(err)
 	}
 	_, err := Prepare(
 		config.StateConfig{Root: root},
 		config.Runtime{Type: "host", Profile: "host"},
 		config.Target{},
-		identity.Identity{Hash: "abc"},
+		identity.Identity{Value: "alice", Hash: "abc"},
 	)
 	if err == nil {
 		t.Fatal("expected symlink rejection")
+	}
+}
+
+func TestIdentityKeyModes(t *testing.T) {
+	id := identity.Identity{Value: "alice@example.com", Hash: "abc123"}
+	tests := []struct {
+		mode string
+		want string
+	}{
+		{"", "alice@example.com"},
+		{"plain", "alice@example.com"},
+		{"base64url", base64.RawURLEncoding.EncodeToString([]byte("alice@example.com"))},
+		{"hash", "abc123"},
+	}
+	for _, test := range tests {
+		got, err := IdentityKey(config.StateConfig{IdentityNaming: test.mode}, id)
+		if err != nil {
+			t.Fatalf("%s: %v", test.mode, err)
+		}
+		if got != test.want {
+			t.Fatalf("%s: got %q, want %q", test.mode, got, test.want)
+		}
+	}
+}
+
+func TestPlainIdentityRejectsUnsafePath(t *testing.T) {
+	_, err := IdentityKey(
+		config.StateConfig{IdentityNaming: "plain"},
+		identity.Identity{Value: "../alice", Hash: "abc"},
+	)
+	if err == nil {
+		t.Fatal("expected unsafe plain identity rejection")
 	}
 }
 

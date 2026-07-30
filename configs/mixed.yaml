@@ -21,6 +21,7 @@ identity:
 
 state:
   root: /var/lib/shelllane/users
+  identityNaming: plain
 
 # 路由 first-match-wins：只枚举例外用户，普通用户走最终默认规则。
 routes:

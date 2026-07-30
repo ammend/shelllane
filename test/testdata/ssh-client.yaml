@@ -6,6 +6,7 @@ identity:
   required: true
 state:
   root: STATE_ROOT/client-unused
+  identityNaming: hash
 routes:
   - match:
       identity: ssh-host-user

@@ -18,9 +18,10 @@ var (
 )
 
 type Identity struct {
-	Value  string
-	Hash   string
-	Source string
+	Value    string
+	Hash     string
+	Source   string
+	StateKey string
 }
 
 func Resolve(cfg config.IdentityConfig, args []string, getenv func(string) string) (Identity, error) {

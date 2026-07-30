@@ -9,6 +9,7 @@ identity:
   required: true
 state:
   root: STATE_ROOT
+  identityNaming: hash
 routes:
   - target: default
 nodes:

@@ -61,8 +61,9 @@ directory.
 ## SSH request
 
 1. The initiating side resolves identity, route, node, and runtime.
-2. It serializes a versioned request containing the identity hash, shell argv,
-   selected runtime, cwd/TTY metadata, and allowlisted environment.
+2. It serializes a versioned request containing the identity hash, the state
+   directory key selected by `state.identityNaming`, shell argv, selected
+   runtime, cwd/TTY metadata, and allowlisted environment.
 3. OpenSSH authenticates the remote account, verifies the host key, and carries
    stdio/PTY.
 4. The remote `shelllane run-remote` helper loads local configuration and state.

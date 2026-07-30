@@ -139,10 +139,10 @@ ShellLane 会消费
 ## 身份与隔离
 
 ShellLane 从配置指定或映射的、已经认证过的上游环境变量读取用户标识。ShellLane 使用原始值做
-精确路由，但只把 SHA-256 哈希写入目录和审计：
+精确路由。用户目录默认使用可读的原始身份，审计仍只记录 SHA-256：
 
 ```text
-/var/lib/shelllane/users/<identity-hash>/
+/var/lib/shelllane/users/<identity>/
 ├── shared/
 │   ├── config/       # 跨 runtime 复用的工具配置
 │   ├── credentials/  # 需要显式挂载的凭据
@@ -154,6 +154,18 @@ ShellLane 从配置指定或映射的、已经认证过的上游环境变量读�
 │   └── cache/
 └── tmp/
 ```
+
+目录命名可以配置为 `plain`（默认、可读）、`base64url`（可逆且路径安全）或
+`hash`（不可逆、隐私最好）：
+
+```yaml
+state:
+  root: /var/lib/shelllane/users
+  identityNaming: plain
+```
+
+`plain` 遇到 `/`、`\\`、`.`、`..` 或超过 255 字节的身份会拒绝执行；此时选
+`base64url` 或 `hash`。
 
 少量例外用户可以显式配置；无法枚举的大量普通用户由最后一条默认路由覆盖。两台或
 多台工作机组成 NodePool 时，Rendezvous Hash 让同一身份稳定落到同一节点。

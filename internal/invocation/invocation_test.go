@@ -7,7 +7,7 @@ import (
 
 func TestRoundTrip(t *testing.T) {
 	want := Request{
-		Version: 1, RequestID: "req", IdentityHash: "abc", Runtime: "host",
+		Version: 1, RequestID: "req", IdentityHash: "abc", IdentityKey: "alice", Runtime: "host",
 		StateMode: "isolated", ShellKind: "bash", Args: []string{"bash", "-lc", "echo ok"}, Cwd: "/tmp",
 		TTY: true, Env: map[string]string{"LANG": "C.UTF-8"},
 	}

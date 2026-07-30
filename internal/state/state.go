@@ -1,6 +1,7 @@
 package state
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -51,7 +52,18 @@ func Prepare(cfg config.StateConfig, runtime config.Runtime, target config.Targe
 	if profile == "" {
 		profile = runtime.Type
 	}
-	root := filepath.Join(cfg.Root, id.Hash)
+	key := id.StateKey
+	if key == "" {
+		var err error
+		key, err = IdentityKey(cfg, id)
+		if err != nil {
+			return Paths{}, err
+		}
+	}
+	if err := validateIdentityKey(key); err != nil {
+		return Paths{}, err
+	}
+	root := filepath.Join(cfg.Root, key)
 	paths := Paths{
 		Root:        root,
 		Home:        filepath.Join(root, "profiles", profile, "home"),
@@ -78,6 +90,37 @@ func Prepare(cfg config.StateConfig, runtime config.Runtime, target config.Targe
 		}
 	}
 	return paths, nil
+}
+
+func IdentityKey(cfg config.StateConfig, id identity.Identity) (string, error) {
+	var key string
+	switch cfg.IdentityNaming {
+	case "", "plain":
+		key = id.Value
+	case "base64url":
+		key = base64.RawURLEncoding.EncodeToString([]byte(id.Value))
+	case "hash":
+		key = id.Hash
+	default:
+		return "", fmt.Errorf("state_prepare_failed: unsupported identity naming %q", cfg.IdentityNaming)
+	}
+	if err := validateIdentityKey(key); err != nil {
+		return "", err
+	}
+	return key, nil
+}
+
+func validateIdentityKey(key string) error {
+	if key == "" {
+		return fmt.Errorf("state_prepare_failed: identity key is empty")
+	}
+	if key == "." || key == ".." || strings.ContainsAny(key, `/\\`) {
+		return fmt.Errorf("state_prepare_failed: identity is not a safe path component; use base64url or hash")
+	}
+	if len([]byte(key)) > 255 {
+		return fmt.Errorf("state_prepare_failed: identity key exceeds 255 bytes; use hash")
+	}
+	return nil
 }
 
 func secureMkdirAll(root, path string) error {

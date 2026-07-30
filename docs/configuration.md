@@ -146,15 +146,28 @@ required by ShellLane.
 ```yaml
 state:
   root: /var/lib/shelllane/users
+  identityNaming: plain
 ```
 
 `root` must be absolute and defaults to `/var/lib/shelllane/users`. The service
-account must be able to create it. Each identity receives a SHA-256-named
-directory with shared config/data/state/credentials/workspace, profile-specific
-home/cache, and tmp directories.
+account must be able to create it. `identityNaming` accepts only:
+
+- `plain` (default): reversible and human-readable; rejects unsafe path
+  components and names longer than 255 bytes.
+- `base64url`: reversible, URL-safe Base64 without padding; avoids separators
+  but does not conceal identity.
+- `hash`: irreversible SHA-256; best when filesystem observers must not learn
+  identities.
+
+Each identity receives a directory with shared
+config/data/state/credentials/workspace, profile-specific home/cache, and tmp
+directories. Audit records and rendezvous routing continue to use SHA-256 in
+all three modes.
 
 State is created on the execution node. Node-pool users remain stable through
 rendezvous hashing; state replication and migration are external concerns.
+Changing `identityNaming` changes directory names; migrate existing state or
+retain the previous mode before deployment.
 
 ## `routes`
 
