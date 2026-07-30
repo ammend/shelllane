@@ -118,7 +118,9 @@ identity:
 ```
 
 启用 `argvEnvFallback: true` 后，ShellLane 读取并消费
-`BOTMUX_USER_ID=alice`，真实 Bash 最终只收到 `bash -lc 'pwd'`。
+`BOTMUX_USER_ID=alice`；真实 Bash 的 argv 只收到 `bash -lc 'pwd'`，同时其环境中仍有
+原值 `BOTMUX_USER_ID=alice`。ShellLane 不删除或改写已有的 `BOTMUX_USER_ID`、
+`SHELLLANE_IDENTITY` 或其他用户环境变量。
 
 ## 上层把身份变量放在 Bash 后面时（兼容模式）
 
@@ -130,7 +132,8 @@ identity:
 
 这是兼容旧 launcher 的备选能力。配置中开启 `identity.argvEnvFallback: true`。
 ShellLane 会消费
-`SHELLLANE_IDENTITY=...`，再把剩余 argv 原样交给真实 Bash；env 与 argv 同时存在但
+`SHELLLANE_IDENTITY=...`，将同名同值恢复到真实 Shell 的环境，再把剩余 argv 原样交给
+真实 Bash；env 与 argv 同时存在但
 值不一致时会拒绝执行。
 
 ## 身份与隔离

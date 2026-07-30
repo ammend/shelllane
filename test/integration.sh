@@ -32,10 +32,10 @@ unset UPSTREAM_USER_ID
 # The mapped upstream variable may also be appended after the shell executable.
 mapped_argv_output="$("$test_dir/sh" UPSTREAM_USER_ID=argv-mapped-user -c '
   test "$#" -eq 0
-  printf "%s" "$HOME"
+  printf "%s|%s" "$HOME" "$UPSTREAM_USER_ID"
 ')"
 mapped_argv_home="$test_dir/state/$(printf argv-mapped-user | sha256sum | cut -d' ' -f1)/profiles/host/home"
-test "$mapped_argv_output" = "$mapped_argv_home"
+test "$mapped_argv_output" = "$mapped_argv_home|argv-mapped-user"
 
 # Some launchers append metadata after the shell executable instead of setting
 # process environment: sh SHELLLANE_IDENTITY=value -c ...

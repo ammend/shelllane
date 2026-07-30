@@ -87,6 +87,24 @@ func EnvNames(cfg config.IdentityConfig) []string {
 	return names
 }
 
+// ArgvEnvironment returns identity assignments carried after argv[0]. They are
+// removed from shell argv but restored as process environment, preserving the
+// launcher's intended KEY=value context.
+func ArgvEnvironment(cfg config.IdentityConfig, args []string) map[string]string {
+	result := map[string]string{}
+	if !cfg.ArgvEnvFallback {
+		return result
+	}
+	for _, arg := range args[1:] {
+		for _, name := range EnvNames(cfg) {
+			if value, ok := strings.CutPrefix(arg, name+"="); ok {
+				result[name] = value
+			}
+		}
+	}
+	return result
+}
+
 func envName(expression string) string {
 	if strings.HasPrefix(expression, "${") && strings.HasSuffix(expression, "}") {
 		return strings.TrimSuffix(strings.TrimPrefix(expression, "${"), "}")

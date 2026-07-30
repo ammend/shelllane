@@ -130,8 +130,10 @@ SHELLLANE_IDENTITY=alice /path/to/bash -lc 'agent-cli ...'
 
 The last form uses the source declared by `envMap`. ShellLane scans `argv[1:]`,
 consumes every matching canonical or mapped metadata item, and forwards
-the remaining argv unchanged. The real Bash receives only
-`bash -lc 'agent-cli ...'`. Identity values are identifiers, not secrets; argv
+the remaining argv unchanged. Each consumed assignment is restored with the
+same name and value in the real shell's environment; existing environment
+entries are never removed or overwritten. The real Bash receives only
+`bash -lc 'agent-cli ...'` as argv. Identity values are identifiers, not secrets; argv
 may be briefly observable in the local process list.
 
 Additional non-secret request context can use environment names such as

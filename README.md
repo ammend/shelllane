@@ -124,9 +124,10 @@ identity:
 ```
 
 ShellLane consumes the matching `KEY=value` item before executing the real
-Bash. The remaining argv is exactly `bash -lc 'agent-cli ...'`. If environment
-and argv identities both exist but disagree, execution fails closed with
-`identity_conflict`.
+Bash, restores the same assignment in its process environment, and leaves all
+existing environment entries unchanged. The remaining argv is exactly
+`bash -lc 'agent-cli ...'`. If environment and argv identities both exist but
+disagree, execution fails closed with `identity_conflict`.
 
 ## Visual guides
 

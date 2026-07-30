@@ -81,7 +81,8 @@ SHELLLANE_IDENTITY=user@example /path/to/bash -lc 'codex ...'
 
 后两种方式只有在 `argvEnvFallback: true` 时启用。ShellLane 扫描 `argv[1:]` 中与
 `identity.env` 或 `envMap` 来源同名的 `KEY=value`，完成解析后删除所有这些元数据参数，所以真实 Bash
-最终只收到 `bash -lc 'codex ...'`。身份不是 secret；argv 在 ShellLane 消费前可能被
+的 argv 最终只收到 `bash -lc 'codex ...'`；同时 ShellLane 将这些同名同值项保留或恢复
+到真实 Shell 的环境中，不删除或覆盖用户已有环境变量。身份不是 secret；argv 在 ShellLane 消费前可能被
 同机进程列表短暂看到。
 
 Session ID 不是 ShellLane 必需字段。如果上层确实要传非敏感上下文，使用

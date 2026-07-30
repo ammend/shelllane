@@ -30,6 +30,9 @@ func New(cfg *config.Config) *Runner {
 }
 
 func (r *Runner) Execute(res routing.Resolution, id identity.Identity, shellKind string, args, environment []string, cwd, requestID string, tty bool) error {
+	// Identity is routing metadata and user context. Always preserve both the
+	// canonical and mapped names across container and SSH allowlist boundaries.
+	res.Runtime.PassEnv = appendIdentityEnv(res.Runtime.PassEnv, identity.EnvNames(r.Config.Identity))
 	if res.Node.Connector == "ssh" {
 		return r.executeSSH(res, id, shellKind, args, environment, cwd, requestID, tty)
 	}
@@ -37,6 +40,21 @@ func (r *Runner) Execute(res routing.Resolution, id identity.Identity, shellKind
 		return fmt.Errorf("backend_unavailable: unsupported connector %q", res.Node.Connector)
 	}
 	return r.executeLocal(res.Runtime, res.Target, id, shellKind, args, environment, cwd, requestID, tty)
+}
+
+func appendIdentityEnv(allow, names []string) []string {
+	result := append([]string(nil), allow...)
+	seen := make(map[string]struct{}, len(result))
+	for _, name := range result {
+		seen[name] = struct{}{}
+	}
+	for _, name := range names {
+		if _, found := seen[name]; !found {
+			result = append(result, name)
+			seen[name] = struct{}{}
+		}
+	}
+	return result
 }
 
 func (r *Runner) ExecuteRemote(request invocation.Request) error {

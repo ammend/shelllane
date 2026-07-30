@@ -16,7 +16,9 @@ the original `argv[0]` is preserved. For SSH, PTY allocation follows the local
 TTY and the remote helper repeats the same host/container execution.
 
 The optional identity argv item is metadata for launchers that cannot set
-environment variables. It is consumed and is not forwarded to the real shell.
+environment variables. It is removed from shell argv and restored as the same
+`KEY=value` in the real shell environment. Existing environment entries are
+not removed or overwritten.
 
 ## Compatibility policy
 

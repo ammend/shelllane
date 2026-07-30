@@ -31,6 +31,7 @@ output="$("$test_dir/sh" -c '
   test "$HOME" = /home/agent
   test "$XDG_CONFIG_HOME" = /home/agent/.config
   test "$SHELLLANE_CONTEXT_REQUEST" = allowed-context
+  test "$SHELLLANE_IDENTITY" = docker-integration-user
   test -z "${SHELLLANE_TEST_SECRET:-}"
   test "$(id -u)" = "'"$(id -u)"'"
   test "$(ls /sys/class/net)" = lo

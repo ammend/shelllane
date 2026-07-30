@@ -91,3 +91,17 @@ func TestResolveMappedArgv(t *testing.T) {
 		t.Fatalf("unexpected identity: %#v", id)
 	}
 }
+
+func TestArgvEnvironmentPreservesCanonicalAndMappedNames(t *testing.T) {
+	cfg := config.IdentityConfig{
+		Env:             "SHELLLANE_IDENTITY",
+		EnvMap:          map[string]string{"SHELLLANE_IDENTITY": "$BOTMUX_USER_ID"},
+		ArgvEnvFallback: true,
+	}
+	got := ArgvEnvironment(cfg, []string{
+		"bash", "BOTMUX_USER_ID=alice", "SHELLLANE_IDENTITY=alice", "-lc", "pwd",
+	})
+	if got["BOTMUX_USER_ID"] != "alice" || got["SHELLLANE_IDENTITY"] != "alice" {
+		t.Fatalf("unexpected assignments: %#v", got)
+	}
+}

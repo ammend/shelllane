@@ -106,7 +106,8 @@ func (a *App) runShell(kind string, argv []string) error {
 		return err
 	}
 	forwarded := stripIdentityArg(argv, cfg.Identity)
-	err = a.NewRunner(cfg).Execute(resolution, id, kind, forwarded, a.Environ(), cwd, requestID, event.TTY)
+	environment := preserveIdentityArgEnvironment(a.Environ(), identity.ArgvEnvironment(cfg.Identity, argv))
+	err = a.NewRunner(cfg).Execute(resolution, id, kind, forwarded, environment, cwd, requestID, event.TTY)
 	if err != nil {
 		event.Event, event.Error = "dispatch_error", err.Error()
 		_ = audit.Write(cfg.Audit.Path, event)
@@ -209,6 +210,23 @@ func (a *App) runRemote(args []string) error {
 		return err
 	}
 	return a.NewRunner(cfg).ExecuteRemote(request)
+}
+
+func preserveIdentityArgEnvironment(environment []string, assignments map[string]string) []string {
+	result := append([]string(nil), environment...)
+	existing := make(map[string]struct{}, len(environment))
+	for _, item := range environment {
+		key, _, found := strings.Cut(item, "=")
+		if found {
+			existing[key] = struct{}{}
+		}
+	}
+	for key, value := range assignments {
+		if _, found := existing[key]; !found {
+			result = append(result, key+"="+value)
+		}
+	}
+	return result
 }
 
 func stripIdentityArg(argv []string, cfg config.IdentityConfig) []string {
