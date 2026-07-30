@@ -4,7 +4,9 @@ shells:
 identity:
   env: SHELLLANE_IDENTITY
   envMap:
-    SHELLLANE_IDENTITY: "$UPSTREAM_USER_ID"
+    SHELLLANE_IDENTITY:
+      - "$__OWNER_OPEN_ID"
+      - "$UPSTREAM_USER_ID"
   argvEnvFallback: true
   required: true
 state:

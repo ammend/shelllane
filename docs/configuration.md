@@ -102,6 +102,7 @@ identity:
   env: SHELLLANE_IDENTITY
   envMap:
     SHELLLANE_IDENTITY:
+      - "$__OWNER_OPEN_ID"
       - "$BOTMUX_USER_ID"
       - "$IDE_USER_ID"
       - "$JOB_USER_ID"

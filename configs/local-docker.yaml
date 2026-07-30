@@ -10,6 +10,7 @@ identity:
   # 任一来源有值即可；多个来源不一致时拒绝执行。
   envMap:
     SHELLLANE_IDENTITY:
+      - "$__OWNER_OPEN_ID"
       - "$BOTMUX_USER_ID"
       - "$IDE_USER_ID"
       - "$JOB_USER_ID"

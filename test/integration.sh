@@ -14,6 +14,7 @@ sed \
   "$project_dir/test/testdata/local.yaml" > "$test_dir/config.yaml"
 
 export SHELLLANE_CONFIG="$test_dir/config.yaml"
+unset __OWNER_OPEN_ID BOTMUX_USER_ID IDE_USER_ID JOB_USER_ID UPSTREAM_USER_ID
 export SHELLLANE_IDENTITY="integration-user"
 
 output="$("$test_dir/sh" -c 'printf "%s|%s" "$HOME" "$XDG_CONFIG_HOME"')"
@@ -36,6 +37,17 @@ mapped_argv_output="$("$test_dir/sh" UPSTREAM_USER_ID=argv-mapped-user -c '
 ')"
 mapped_argv_home="$test_dir/state/$(printf argv-mapped-user | sha256sum | cut -d' ' -f1)/profiles/host/home"
 test "$mapped_argv_output" = "$mapped_argv_home|argv-mapped-user"
+
+# Botmux appends __OWNER_OPEN_ID after the shell command and working-directory
+# argument. ShellLane must resolve it, remove only that metadata argv item, and
+# restore it in the real shell environment without disturbing other arguments.
+botmux_output="$("$test_dir/sh" -c '
+  test "$1" = /workspace
+  test "$2" = tail-argument
+  printf "%s|%s" "$HOME" "$__OWNER_OPEN_ID"
+' _ /workspace __OWNER_OPEN_ID=ou_botmux tail-argument)"
+botmux_home="$test_dir/state/$(printf ou_botmux | sha256sum | cut -d' ' -f1)/profiles/host/home"
+test "$botmux_output" = "$botmux_home|ou_botmux"
 
 # Some launchers append metadata after the shell executable instead of setting
 # process environment: sh SHELLLANE_IDENTITY=value -c ...

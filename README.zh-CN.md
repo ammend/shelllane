@@ -116,6 +116,7 @@ identity:
   env: SHELLLANE_IDENTITY
   envMap:
     SHELLLANE_IDENTITY:
+      - "$__OWNER_OPEN_ID"  # Botmux 当前实际追加在 Bash 后的发送者身份
       - "$BOTMUX_USER_ID"
       - "$IDE_USER_ID"
       - "$JOB_USER_ID"
@@ -129,6 +130,11 @@ identity:
 `SHELLLANE_IDENTITY=ou_xxx`，用于路由和隔离。这个映射只发生在 ShellLane 内部，不会
 要求上游动态增加环境变量，也不会修改真实 Shell 收到的环境。若 canonical 变量和映射
 来源同时存在但值不同，ShellLane 会以 `identity_conflict` 拒绝执行。
+
+Botmux 当前版本把发送者身份作为 `__OWNER_OPEN_ID=ou_xxx` 追加在 Shell 可执行文件
+后，因此 Botmux 接入必须包含 `$__OWNER_OPEN_ID`，并开启 `argvEnvFallback`。若缺少
+该映射，ShellLane 会因 `identity_missing` 退出；上层随后可能只显示 tmux session
+已经消失的 `pipe-pane` 错误。
 
 如果 launcher 把自己已有的变量追加在 Shell 可执行文件后，同一个映射也会生效：
 

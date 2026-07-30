@@ -53,6 +53,7 @@ identity:
   env: SHELLLANE_IDENTITY
   envMap:
     SHELLLANE_IDENTITY:
+      - "$__OWNER_OPEN_ID"
       - "$BOTMUX_USER_ID"
       - "$IDE_USER_ID"
       - "$JOB_USER_ID"
@@ -65,6 +66,10 @@ identity:
 多个来源值相同也接受，不同则拒绝。这里无需任何上层创建 `SHELLLANE_IDENTITY`。
 `${BOTMUX_USER_ID}` 也可使用。每一项只接受单一变量引用，不执行 shell 展开、命令替换
 或字符串拼接。
+
+Botmux 当前把可信发送者作为 Bash 后的 `__OWNER_OPEN_ID=...` 传入，所以其映射必须
+包含 `$__OWNER_OPEN_ID` 且启用 `argvEnvFallback`。`BOTMUX_USER_ID` 仅适用于确实
+提供该名字的版本或部署。
 
 身份来源必须由已经完成认证的上层应用设置，不能直接信任外部用户提交的任意环境变量。
 若 `SHELLLANE_IDENTITY` 与映射来源同时存在但值不同，会以 `identity_conflict` 失败。

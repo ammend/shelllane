@@ -10,6 +10,7 @@ identity:
   # 支持 bot、IDE、任务平台等不同 launcher。
   envMap:
     SHELLLANE_IDENTITY:
+      - "$__OWNER_OPEN_ID"
       - "$BOTMUX_USER_ID"
       - "$IDE_USER_ID"
       - "$JOB_USER_ID"
