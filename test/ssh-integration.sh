@@ -42,6 +42,14 @@ cleanup() {
 }
 trap cleanup EXIT
 
+read_file() {
+  if $use_sudo; then
+    sudo cat "$1"
+  else
+    cat "$1"
+  fi
+}
+
 port="$(shuf -i 20000-40000 -n 1)"
 while ss -ltn | grep -q ":$port "; do
   port="$(shuf -i 20000-40000 -n 1)"
@@ -117,7 +125,7 @@ host_output="$("$test_dir/sh" -c '
   printf "%s|ssh-host-ok" "$HOME"
 ')"
 test "$host_output" = "$test_dir/state/$host_hash/profiles/host/home|ssh-host-ok"
-test "$(cat "$test_dir/state/$host_hash/shared/state/host-marker")" = host-persisted
+test "$(read_file "$test_dir/state/$host_hash/shared/state/host-marker")" = host-persisted
 
 set +e
 "$test_dir/sh" -c 'exit 37'
@@ -137,7 +145,7 @@ container_output="$("$test_dir/sh" -c '
   printf ssh-container-ok
 ')"
 test "$container_output" = ssh-container-ok
-test "$(cat "$test_dir/state/$container_hash/shared/workspace/ssh-container-marker")" = container-persisted
+test "$(read_file "$test_dir/state/$container_hash/shared/workspace/ssh-container-marker")" = container-persisted
 test -z "$(docker ps -aq --filter name=shelllane-)"
 
 echo "ssh integration: localhost transport, remote helper, host/container runtimes, state, env, cleanup, and exit status passed"
