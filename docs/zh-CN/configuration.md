@@ -1,6 +1,6 @@
 # 配置教程
 
-完整可运行场景都在 [`configs/`](../../configs/README.zh-CN.md)。本页解释配置如何组合。
+完整可运行场景都在 [`.configs/`](../../.configs/README.zh-CN.md)。本页解释配置如何组合。
 逐字段类型与默认值见 [英文完整参考](../configuration.md)。
 
 ## 配置加载顺序
@@ -13,8 +13,8 @@
 未知字段、错误引用和不支持的值会直接报错。部署前执行：
 
 ```bash
-shelllane config check --config configs/mixed.yaml
-shelllane doctor --config configs/mixed.yaml
+shelllane config check --config .configs/mixed.yaml
+shelllane doctor --config .configs/mixed.yaml
 ```
 
 ## 最小心智模型
@@ -67,7 +67,7 @@ routes:
 用命令查看结果，不要靠猜：
 
 ```bash
-shelllane route test --config configs/mixed.yaml --identity arbitrary-user
+shelllane route test --config .configs/mixed.yaml --identity arbitrary-user
 ```
 
 ## Node 与 SSH

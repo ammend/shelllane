@@ -334,7 +334,7 @@ does not record raw identities or commands.
 
 ## Two-machine ordinary-user example
 
-The complete [mixed configuration](../configs/mixed.yaml) demonstrates:
+The complete [mixed configuration](../.configs/mixed.yaml) demonstrates:
 
 - named administrators running locally;
 - a named developer running on a dedicated SSH machine;

@@ -14,7 +14,7 @@ vet:
 	go vet ./...
 
 configs-check:
-	@for config in configs/*.yaml; do \
+	@for config in .configs/*.yaml; do \
 		go run ./cmd/shelllane config check --config "$$config"; \
 	done
 

@@ -3,6 +3,16 @@
 这里的每个 YAML 都是完整配置，可以直接执行 `shelllane config check`，不是省略关键
 字段的片段。
 
+从项目根目录显式选择配置：
+
+```bash
+export SHELLLANE_CONFIG="$PWD/.configs/local-host.yaml"
+```
+
+ShellLane 不会自动信任当前目录的 `.configs`：项目代码不应仅凭被 checkout，就能修改
+SSH 目标或运行镜像。服务部署仍应由管理员把选定配置安装到
+`/etc/shelllane/config.yaml`。
+
 ## local + host
 
 使用 [`local-host.yaml`](local-host.yaml)。
@@ -67,7 +77,7 @@ SSH 只是通信层；Docker 真正运行在远端机器。远端 helper 收到�
 
 ```bash
 make configs-check
-shelllane route test --config configs/mixed.yaml --identity admin@example
-shelllane route test --config configs/mixed.yaml --identity developer@example
-shelllane route test --config configs/mixed.yaml --identity arbitrary-user
+shelllane route test --config .configs/mixed.yaml --identity admin@example
+shelllane route test --config .configs/mixed.yaml --identity developer@example
+shelllane route test --config .configs/mixed.yaml --identity arbitrary-user
 ```

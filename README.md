@@ -41,7 +41,7 @@ default target.
 ## Start here
 
 1. Read the [architecture and request flow](docs/architecture.md).
-2. Pick a copy-ready configuration from [`configs/`](configs/README.md).
+2. Pick a copy-ready configuration from [`.configs/`](.configs/README.md).
 3. Follow the [configuration reference](docs/configuration.md).
 4. Review the [security model](docs/security.md).
 
@@ -53,7 +53,7 @@ sudo ln -s /usr/local/bin/shelllane /usr/local/lib/shelllane/bash
 sudo install -d -m 0700 -o "$USER" /var/lib/shelllane/users
 sudo install -d -m 0700 -o "$USER" /var/log/shelllane
 
-export SHELLLANE_CONFIG="$PWD/configs/local-host.yaml"
+export SHELLLANE_CONFIG="$PWD/.configs/local-host.yaml"
 export SHELLLANE_IDENTITY="user@example"
 /usr/local/lib/shelllane/bash -lc 'printf "%s\n" "$HOME"'
 ```
@@ -61,9 +61,9 @@ export SHELLLANE_IDENTITY="user@example"
 Validate before deployment:
 
 ```bash
-shelllane config check --config configs/local-host.yaml
-shelllane route test --config configs/mixed.yaml --identity developer@example
-shelllane doctor --config configs/mixed.yaml
+shelllane config check --config .configs/local-host.yaml
+shelllane route test --config .configs/mixed.yaml --identity developer@example
+shelllane doctor --config .configs/mixed.yaml
 ```
 
 ## Visual guides

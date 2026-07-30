@@ -36,13 +36,13 @@ Shell 环境。ShellLane 不处理聊天消息，不理解 prompt，也不是 Bo
 
 | 连接方式 | 运行方式 | 典型用途 | 配置 |
 | --- | --- | --- | --- |
-| local | host | 管理员、单机开发 | [`local-host.yaml`](configs/local-host.yaml) |
-| local | container | 普通用户本机容器隔离 | [`local-docker.yaml`](configs/local-docker.yaml) |
-| SSH | host | 团队成员自己的开发机 | [`ssh-host.yaml`](configs/ssh-host.yaml) |
-| SSH | container | 远端工作节点容器隔离 | [`ssh-docker.yaml`](configs/ssh-docker.yaml) |
+| local | host | 管理员、单机开发 | [`local-host.yaml`](.configs/local-host.yaml) |
+| local | container | 普通用户本机容器隔离 | [`local-docker.yaml`](.configs/local-docker.yaml) |
+| SSH | host | 团队成员自己的开发机 | [`ssh-host.yaml`](.configs/ssh-host.yaml) |
+| SSH | container | 远端工作节点容器隔离 | [`ssh-docker.yaml`](.configs/ssh-docker.yaml) |
 
 管理员、团队成员、普通用户混合路由见
-[`mixed.yaml`](configs/mixed.yaml)。
+[`mixed.yaml`](.configs/mixed.yaml)。
 
 ## 三分钟体验
 
@@ -54,7 +54,7 @@ sudo ln -s /usr/local/bin/shelllane /usr/local/lib/shelllane/bash
 sudo install -d -m 0700 -o "$USER" /var/lib/shelllane/users
 sudo install -d -m 0700 -o "$USER" /var/log/shelllane
 
-export SHELLLANE_CONFIG="$PWD/configs/local-host.yaml"
+export SHELLLANE_CONFIG="$PWD/.configs/local-host.yaml"
 export SHELLLANE_IDENTITY="user@example"
 /usr/local/lib/shelllane/bash -lc 'echo "HOME=$HOME"; pwd'
 ```
@@ -62,10 +62,10 @@ export SHELLLANE_IDENTITY="user@example"
 在接入上层应用前先检查配置和路由：
 
 ```bash
-shelllane config check --config configs/mixed.yaml
-shelllane route test --config configs/mixed.yaml --identity admin@example
-shelllane route test --config configs/mixed.yaml --identity developer@example
-shelllane route test --config configs/mixed.yaml --identity any-normal-user
+shelllane config check --config .configs/mixed.yaml
+shelllane route test --config .configs/mixed.yaml --identity admin@example
+shelllane route test --config .configs/mixed.yaml --identity developer@example
+shelllane route test --config .configs/mixed.yaml --identity any-normal-user
 ```
 
 ## 身份与隔离
@@ -103,7 +103,7 @@ PNG 在 GitHub 页面直接显示；同目录保留 Archify 交互 HTML，clone 
 
 ## 文档导航
 
-- [按场景选择配置](configs/README.zh-CN.md)
+- [按场景选择配置](.configs/README.zh-CN.md)
 - [中文配置教程](docs/zh-CN/configuration.md)
 - [完整字段参考（英文）](docs/configuration.md)
 - [中文安全模型](docs/zh-CN/security.md)

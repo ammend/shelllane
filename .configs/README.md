@@ -3,6 +3,17 @@
 Each file is a complete, strictly validated configuration rather than a partial
 snippet.
 
+The directory is hidden by convention. Select a file explicitly from the
+project root:
+
+```bash
+export SHELLLANE_CONFIG="$PWD/.configs/local-host.yaml"
+```
+
+ShellLane intentionally does not auto-load configuration from the current
+working directory: a checked-out project must not be able to redirect execution
+to an arbitrary SSH node or image without administrator intent.
+
 | File | Connector | Runtime | Use |
 | --- | --- | --- | --- |
 | [`local-host.yaml`](local-host.yaml) | local | host | Trusted local execution |
