@@ -83,7 +83,23 @@ $HOME/.config/shelllane/config.yaml
 
 System services may use `/etc/shelllane/config.yaml`.
 
-## Identity appended after Bash
+## Map an upstream identity
+
+The launcher does not need to synthesize `SHELLLANE_IDENTITY`. Map the trusted
+variable it already exports into ShellLane's canonical identity:
+
+```yaml
+identity:
+  env: SHELLLANE_IDENTITY
+  envMap:
+    SHELLLANE_IDENTITY: "$BOTMUX_USER_ID"
+  required: true
+```
+
+If both variables exist and disagree, ShellLane fails closed with
+`identity_conflict`.
+
+## Identity appended after Bash (compatibility)
 
 Some launchers append metadata after the shell executable:
 
@@ -118,7 +134,8 @@ PNG/JPEG/WebP/SVG export. Maintainable JSON sources live in
 
 Any launcher that can choose a shell executable and provide a trusted identity
 can use ShellLane. For example, botmux can set `launchShell` to a ShellLane
-symlink and map its authenticated sender to `SHELLLANE_IDENTITY`. The same
+symlink; ShellLane can map botmux's existing `BOTMUX_USER_ID` to its canonical
+identity in configuration. The same
 pattern applies to IDE services, internal automation, web terminals, and job
 runners.
 

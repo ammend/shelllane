@@ -5,7 +5,7 @@ OS 账号、SSH、容器引擎、镜像、mount、网络和宿主机共同决定
 
 ## 信任边界
 
-- 上层 launcher 必须可信地设置 `SHELLLANE_IDENTITY`；
+- 上层 launcher 必须提供可信的身份变量；ShellLane 可通过 `identity.envMap` 将其映射为统一身份；
 - 配置、二进制、SSH key 与 known_hosts 只能由管理员修改；
 - SSH 远端账号和容器镜像属于可信计算基础；
 - 普通用户输入、prompt 和 Agent 生成的命令均视为不可信。

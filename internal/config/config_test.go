@@ -60,6 +60,31 @@ func TestLoadUsesXDGConfigHome(t *testing.T) {
 	}
 }
 
+func TestValidateRejectsIdentityEnvMapExpression(t *testing.T) {
+	required := true
+	cfg := Config{
+		Version: 1,
+		Identity: IdentityConfig{
+			Env:      "SHELLLANE_IDENTITY",
+			EnvMap:   map[string]string{"SHELLLANE_IDENTITY": "$(id)"},
+			Required: &required,
+			Hash:     "sha256",
+		},
+		State:  StateConfig{Root: "/tmp/shelllane"},
+		Routes: []Route{{Target: "local"}},
+		Nodes:  map[string]Node{"local": {Connector: "local"}},
+		Runtimes: map[string]Runtime{
+			"host": {Type: "host"},
+		},
+		Targets: map[string]Target{
+			"local": {Node: "local", Runtime: "host"},
+		},
+	}
+	if err := cfg.Validate(); err == nil || !strings.Contains(err.Error(), "must be $NAME or ${NAME}") {
+		t.Fatalf("expected invalid envMap error, got %v", err)
+	}
+}
+
 func TestLoadRejectsUnknownField(t *testing.T) {
 	content := strings.Replace(validConfig, "STATE_ROOT", filepath.Join(t.TempDir(), "state"), 1)
 	content += "surprise: true\n"

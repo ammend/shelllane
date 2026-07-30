@@ -31,10 +31,11 @@ type Config struct {
 }
 
 type IdentityConfig struct {
-	Env             string `yaml:"env"`
-	ArgvEnvFallback bool   `yaml:"argvEnvFallback"`
-	Required        *bool  `yaml:"required"`
-	Hash            string `yaml:"hash"`
+	Env             string            `yaml:"env"`
+	EnvMap          map[string]string `yaml:"envMap"`
+	ArgvEnvFallback bool              `yaml:"argvEnvFallback"`
+	Required        *bool             `yaml:"required"`
+	Hash            string            `yaml:"hash"`
 }
 
 type StateConfig struct {
@@ -245,8 +246,24 @@ func (c *Config) Validate() error {
 	if c.Identity.Hash != "sha256" {
 		problems = append(problems, "identity.hash must be sha256")
 	}
-	if c.Identity.Env == "" || strings.ContainsRune(c.Identity.Env, '=') {
+	if !validEnvName(c.Identity.Env) {
 		problems = append(problems, "identity.env must be a valid environment variable name")
+	}
+	for target, source := range c.Identity.EnvMap {
+		if target != c.Identity.Env {
+			problems = append(problems, fmt.Sprintf("identity.envMap target %q must equal identity.env %q", target, c.Identity.Env))
+		}
+		if !strings.HasPrefix(source, "$") {
+			problems = append(problems, fmt.Sprintf("identity.envMap source %q must be $NAME or ${NAME}", source))
+			continue
+		}
+		sourceName := strings.TrimSuffix(strings.TrimPrefix(source, "${"), "}")
+		if strings.HasPrefix(source, "$") && !strings.HasPrefix(source, "${") {
+			sourceName = strings.TrimPrefix(source, "$")
+		}
+		if !validEnvName(sourceName) {
+			problems = append(problems, fmt.Sprintf("identity.envMap source %q must be $NAME or ${NAME}", source))
+		}
 	}
 	for _, kind := range []string{"bash", "zsh", "sh"} {
 		if value := c.Shells[kind]; value != "" && !filepath.IsAbs(value) {
@@ -359,4 +376,20 @@ func (c *Config) Validate() error {
 		return errors.New(strings.Join(problems, "; "))
 	}
 	return nil
+}
+
+func validEnvName(name string) bool {
+	if name == "" {
+		return false
+	}
+	for index, char := range name {
+		if (char >= 'A' && char <= 'Z') || (char >= 'a' && char <= 'z') || char == '_' {
+			continue
+		}
+		if index > 0 && char >= '0' && char <= '9' {
+			continue
+		}
+		return false
+	}
+	return true
 }

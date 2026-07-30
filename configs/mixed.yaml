@@ -11,7 +11,11 @@ shells:
 
 identity:
   env: SHELLLANE_IDENTITY
-  argvEnvFallback: true
+  # ShellLane's canonical identity is populated from the variable the launcher
+  # already provides. The launcher does not need to create a new variable.
+  envMap:
+    SHELLLANE_IDENTITY: "$BOTMUX_USER_ID"
+  argvEnvFallback: false
   required: true
 
 state:

@@ -3,6 +3,8 @@ shells:
   sh: /bin/sh
 identity:
   env: SHELLLANE_IDENTITY
+  envMap:
+    SHELLLANE_IDENTITY: "$UPSTREAM_USER_ID"
   argvEnvFallback: true
   required: true
 state:

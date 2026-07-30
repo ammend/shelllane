@@ -92,7 +92,25 @@ shelllane route test --config configs/mixed.yaml --identity any-normal-user
 不是 `/home/liudongwei/configs/local-host.yaml`。后者只有在仓库正好位于
 `/home/liudongwei` 时才是一个模板文件。
 
-## 上层把身份变量放在 Bash 后面时
+## 映射上层已有的身份变量
+
+上层不需要专门设置 `SHELLLANE_IDENTITY`。如果 launcher 已经提供经过认证的身份变量，
+在 ShellLane 配置中完成映射即可：
+
+```yaml
+identity:
+  env: SHELLLANE_IDENTITY
+  envMap:
+    SHELLLANE_IDENTITY: "$BOTMUX_USER_ID"
+  required: true
+```
+
+例如上游进程本来就有 `BOTMUX_USER_ID=ou_xxx`，ShellLane 会把它解析为内部统一身份
+`SHELLLANE_IDENTITY=ou_xxx`，用于路由和隔离。这个映射只发生在 ShellLane 内部，不会
+要求上游动态增加环境变量，也不会修改真实 Shell 收到的环境。若 canonical 变量和映射
+来源同时存在但值不同，ShellLane 会以 `identity_conflict` 拒绝执行。
+
+## 上层把身份变量放在 Bash 后面时（兼容模式）
 
 如果上层不是设置进程环境，而是在 Shell 可执行文件后追加变量：
 
@@ -100,13 +118,14 @@ shelllane route test --config configs/mixed.yaml --identity any-normal-user
 /usr/local/lib/shelllane/bash SHELLLANE_IDENTITY=user@example -lc 'codex ...'
 ```
 
-配置中开启 `identity.argvEnvFallback: true`。ShellLane 会消费
+这是兼容旧 launcher 的备选能力。配置中开启 `identity.argvEnvFallback: true`。
+ShellLane 会消费
 `SHELLLANE_IDENTITY=...`，再把剩余 argv 原样交给真实 Bash；env 与 argv 同时存在但
 值不一致时会拒绝执行。
 
 ## 身份与隔离
 
-上层应用把已经认证过的用户标识放入 `SHELLLANE_IDENTITY`。ShellLane 使用原始值做
+ShellLane 从配置指定或映射的、已经认证过的上游环境变量读取用户标识。ShellLane 使用原始值做
 精确路由，但只把 SHA-256 哈希写入目录和审计：
 
 ```text
@@ -149,8 +168,9 @@ PNG 在 GitHub 页面直接显示；同目录保留 Archify 交互 HTML，clone 
 ## 接入 botmux 等上层应用
 
 botmux 只是一个用途示例。把某个 Bot 的 `launchShell` 指向
-`/usr/local/lib/shelllane/bash`，并把已经认证的消息发送者映射到
-`SHELLLANE_IDENTITY` 即可。Codex、CC、Trae 或其他 CLI 的启动参数不需要由
+`/usr/local/lib/shelllane/bash`，再在 ShellLane 的 `identity.envMap` 中把
+`BOTMUX_USER_ID` 映射为统一身份即可；botmux 无需动态设置新变量。Codex、CC、Trae
+或其他 CLI 的启动参数不需要由
 ShellLane 理解。
 
 IDE 服务、Web Terminal、内部任务平台和 CI Runner 也可以用相同方式接入。

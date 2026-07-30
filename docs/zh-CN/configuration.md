@@ -51,15 +51,22 @@ targets:
 ```yaml
 identity:
   env: SHELLLANE_IDENTITY
-  argvEnvFallback: true
+  envMap:
+    SHELLLANE_IDENTITY: "$BOTMUX_USER_ID"
+  argvEnvFallback: false
   required: true
 ```
 
-身份必须由已经完成认证的上层应用设置，不能直接信任外部用户提交的任意环境变量。
-env 和 argv fallback 同时存在但值不同会失败。原始身份用于精确匹配，目录和审计只用
-SHA-256。
+`env` 是 ShellLane 内部的统一身份名；`envMap` 的 key 必须与它相同，value 是
+上层已经提供的环境变量引用。这里表示读取 `BOTMUX_USER_ID`，而不是要求上层创建
+`SHELLLANE_IDENTITY`。`${BOTMUX_USER_ID}` 也可使用。映射只接受单一变量引用，不执行
+shell 展开、命令替换或字符串拼接。
 
-两种等价的上层调用：
+身份来源必须由已经完成认证的上层应用设置，不能直接信任外部用户提交的任意环境变量。
+若 `SHELLLANE_IDENTITY` 与映射来源同时存在但值不同，会以 `identity_conflict` 失败。
+原始身份用于精确匹配，目录和审计只用 SHA-256。
+
+如果上层没有可映射的变量，或只能把元数据追加在 Bash 后面，仍可使用兼容模式：
 
 ```bash
 # 首选：真正的进程环境

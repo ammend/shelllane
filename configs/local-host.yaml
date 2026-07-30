@@ -8,6 +8,9 @@ shells:
 
 identity:
   env: SHELLLANE_IDENTITY
+  # If the launcher already exports its own authenticated user variable, map it:
+  # envMap:
+  #   SHELLLANE_IDENTITY: "$UPSTREAM_USER_ID"
   # 兼容 launcher 在 bash 后追加 KEY=value 参数。
   argvEnvFallback: true
   required: true

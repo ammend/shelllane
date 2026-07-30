@@ -40,3 +40,37 @@ func TestResolveMissing(t *testing.T) {
 		t.Fatalf("expected missing identity, got %v", err)
 	}
 }
+
+func TestResolveFromMappedEnvironment(t *testing.T) {
+	required := true
+	cfg := config.IdentityConfig{
+		Env:      "SHELLLANE_IDENTITY",
+		EnvMap:   map[string]string{"SHELLLANE_IDENTITY": "$BOTMUX_USER_ID"},
+		Required: &required,
+	}
+	values := map[string]string{"BOTMUX_USER_ID": "ou_alice"}
+	id, err := Resolve(cfg, []string{"bash"}, func(key string) string { return values[key] })
+	if err != nil {
+		t.Fatal(err)
+	}
+	if id.Value != "ou_alice" || id.Source != "env:BOTMUX_USER_ID" {
+		t.Fatalf("unexpected identity: %#v", id)
+	}
+}
+
+func TestResolveMappedEnvironmentConflict(t *testing.T) {
+	required := true
+	cfg := config.IdentityConfig{
+		Env:      "SHELLLANE_IDENTITY",
+		EnvMap:   map[string]string{"SHELLLANE_IDENTITY": "${BOTMUX_USER_ID}"},
+		Required: &required,
+	}
+	values := map[string]string{
+		"SHELLLANE_IDENTITY": "alice",
+		"BOTMUX_USER_ID":     "bob",
+	}
+	_, err := Resolve(cfg, []string{"bash"}, func(key string) string { return values[key] })
+	if !errors.Is(err, ErrConflict) {
+		t.Fatalf("expected conflict, got %v", err)
+	}
+}

@@ -47,7 +47,7 @@ runtime。把这两个维度分开，四种组合自然出现，而不需要四�
 ## 本地请求
 
 1. 上层执行名为 `bash`、`zsh` 或 `sh` 的 ShellLane 软链；
-2. ShellLane 严格读取 YAML 和 `SHELLLANE_IDENTITY`；
+2. ShellLane 严格读取 YAML，并从配置指定或映射的上游变量解析统一身份；
 3. 第一条匹配规则选中 Target；
 4. 根据身份哈希准备独立用户状态；
 5. host 使用 `exec(2)` 替换进程，container 使用 Docker/Podman；

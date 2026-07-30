@@ -49,7 +49,8 @@ directory.
 ## Local request
 
 1. The launcher executes a ShellLane symlink named `bash`, `zsh`, or `sh`.
-2. ShellLane strictly loads YAML and resolves `SHELLLANE_IDENTITY`.
+2. ShellLane strictly loads YAML and resolves the canonical identity from the
+   configured or mapped upstream variable.
 3. The first matching route selects a target.
 4. ShellLane prepares the hashed per-user state.
 5. A host runtime calls `exec(2)`; a container runtime replaces the process

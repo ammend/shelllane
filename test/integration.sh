@@ -21,6 +21,14 @@ expected_home="$test_dir/state/$(printf integration-user | sha256sum | cut -d' '
 expected_config="$test_dir/state/$(printf integration-user | sha256sum | cut -d' ' -f1)/shared/config"
 test "$output" = "$expected_home|$expected_config"
 
+# The launcher may expose its existing authenticated identity variable.
+unset SHELLLANE_IDENTITY
+export UPSTREAM_USER_ID="mapped-user"
+mapped_output="$("$test_dir/sh" -c 'printf "%s" "$HOME"')"
+mapped_home="$test_dir/state/$(printf mapped-user | sha256sum | cut -d' ' -f1)/profiles/host/home"
+test "$mapped_output" = "$mapped_home"
+unset UPSTREAM_USER_ID
+
 # Some launchers append metadata after the shell executable instead of setting
 # process environment: sh SHELLLANE_IDENTITY=value -c ...
 unset SHELLLANE_IDENTITY

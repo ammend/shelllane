@@ -100,6 +100,8 @@ inside the image.
 ```yaml
 identity:
   env: SHELLLANE_IDENTITY
+  envMap:
+    SHELLLANE_IDENTITY: "$UPSTREAM_USER_ID"
   argvEnvFallback: false
   required: true
   hash: sha256
@@ -108,6 +110,7 @@ identity:
 | Field | Default | Meaning |
 | --- | --- | --- |
 | `env` | `SHELLLANE_IDENTITY` | Trusted environment variable containing the upstream identity. |
+| `envMap` | none | Maps the canonical identity to an environment variable the launcher already exports, for example `SHELLLANE_IDENTITY: "$BOTMUX_USER_ID"`. |
 | `argvEnvFallback` | `false` | Also accept and consume an argv item such as `SHELLLANE_IDENTITY=alice`. |
 | `required` | `true` | Fail closed when no identity exists. If false, use `anonymous`. |
 | `hash` | `sha256` | Path-safe identity derivation; currently the only supported algorithm. |
