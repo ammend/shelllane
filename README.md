@@ -57,7 +57,9 @@ for the invoking user. It also copies every `configs/*.yaml` template to the
 user's `$HOME/.config/shelllane/` and initializes `config.yaml` from
 `local-host.yaml` only when `config.yaml` does not already exist. Reinstalling
 therefore preserves the active configuration. Under `sudo`, `SUDO_USER` and
-that account's HOME are used instead of `root`.
+that account's HOME are used instead of `root`. If sudo's `secure_path` cannot
+find Go, the build step resolves Go from `SUDO_USER`'s login environment and
+runs the compiler as that unprivileged user.
 Install locations are customizable:
 
 ```bash

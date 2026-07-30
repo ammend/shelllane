@@ -11,8 +11,20 @@ CONFIG_DIR ?=
 .PHONY: build install install-bin install-configs install-runtime-dirs uninstall test race vet configs-check check integration docker-integration ssh-integration clean
 
 build:
-	mkdir -p bin
-	go build -trimpath -ldflags "-s -w" -o bin/shelllane ./cmd/shelllane
+	@if test -n "$(SUDO_USER)"; then \
+		user_shell="$$(getent passwd "$(SUDO_USER)" | cut -d: -f7)"; \
+		test -n "$$user_shell" || user_shell=/bin/sh; \
+		go_bin="$$(sudo -u "$(SUDO_USER)" -H "$$user_shell" -lc 'command -v go' 2>/dev/null | tail -n 1)"; \
+		test -n "$$go_bin" || { echo "go not found in $(SUDO_USER)'s login environment"; exit 1; }; \
+		sudo -u "$(SUDO_USER)" -H mkdir -p bin; \
+		sudo -u "$(SUDO_USER)" -H "$$go_bin" build -trimpath -ldflags "-s -w" -o bin/shelllane ./cmd/shelllane; \
+	elif command -v go >/dev/null 2>&1; then \
+		mkdir -p bin; \
+		go build -trimpath -ldflags "-s -w" -o bin/shelllane ./cmd/shelllane; \
+	else \
+		echo "go not found in PATH"; \
+		exit 1; \
+	fi
 
 install: install-bin install-runtime-dirs install-configs
 

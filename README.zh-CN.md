@@ -56,7 +56,9 @@ export SHELLLANE_IDENTITY="user@example"
 准备状态和日志目录，并把全部 `configs/*.yaml` 示例复制到用户的
 `$HOME/.config/shelllane/`。若 `config.yaml` 尚不存在，会用 `local-host.yaml`
 初始化；重复安装不会覆盖用户已经修改的主配置。通过 `sudo` 执行时读取 `SUDO_USER`
-及该账号的 HOME，不会把配置装到 `/root`。安装位置、运行账号和配置目录可以覆盖：
+及该账号的 HOME，不会把配置装到 `/root`。如果 sudo 的 `secure_path` 找不到 Go，
+构建步骤会从 `SUDO_USER` 的登录环境定位 Go，并以该普通用户身份编译，不要求 root
+的 PATH 包含 Go。安装位置、运行账号和配置目录可以覆盖：
 
 ```bash
 sudo make install PREFIX=/opt/shelllane RUNTIME_USER=agent
