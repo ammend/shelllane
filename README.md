@@ -47,22 +47,23 @@ default target.
 
 ```bash
 sudo make install
-
-mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/shelllane"
-cp configs/local-host.yaml \
-  "${XDG_CONFIG_HOME:-$HOME/.config}/shelllane/config.yaml"
 export SHELLLANE_IDENTITY="user@example"
 /usr/local/lib/shelllane/bash -lc 'printf "%s\n" "$HOME"'
 ```
 
 `make install` builds the binary, installs it under `/usr/local/bin`, creates
 the `bash`, `zsh`, and `sh` wrapper links, and prepares state/log directories
-for the invoking user. Under `sudo`, `SUDO_USER` is used instead of `root`.
+for the invoking user. It also copies every `configs/*.yaml` template to the
+user's `$HOME/.config/shelllane/` and initializes `config.yaml` from
+`local-host.yaml` only when `config.yaml` does not already exist. Reinstalling
+therefore preserves the active configuration. Under `sudo`, `SUDO_USER` and
+that account's HOME are used instead of `root`.
 Install locations are customizable:
 
 ```bash
 sudo make install PREFIX=/opt/shelllane RUNTIME_USER=agent
 make install DESTDIR=/tmp/package-root RUNTIME_USER="$USER"
+sudo make install CONFIG_DIR=/custom/xdg/shelllane
 ```
 
 `make uninstall` removes only the binary and wrapper links; configuration,
