@@ -1,0 +1,30 @@
+version: 1
+shells:
+  sh: /bin/sh
+identity:
+  env: SHELLLANE_IDENTITY
+  required: true
+state:
+  root: STATE_ROOT
+routes:
+  - target: local-host
+nodes:
+  local:
+    connector: local
+runtimes:
+  host:
+    type: host
+  sandbox:
+    type: container
+    engine: docker
+    image: alpine@sha256:14358309a308569c32bdc37e2e0e9694be33a9d99e68afb0f5ff33cc1f695dce
+    user: "CONTAINER_USER"
+    pullPolicy: missing
+    workdir: /workspace
+    network: restricted
+    readOnly: true
+targets:
+  local-host:
+    node: local
+    runtime: host
+audit: {}

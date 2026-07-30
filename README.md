@@ -124,6 +124,8 @@ and current boundaries.
 ```bash
 make check
 make integration
+make docker-integration
+make ssh-integration
 ```
 
 The project uses the standard Go toolchain and has no runtime Go dependencies

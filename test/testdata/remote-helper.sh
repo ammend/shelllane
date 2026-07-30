@@ -1,0 +1,3 @@
+#!/bin/sh
+export SHELLLANE_CONFIG="REMOTE_CONFIG"
+exec "SHELLLANE_BINARY" "$@"

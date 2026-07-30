@@ -20,4 +20,8 @@ jobs:
       - run: make check
       - run: make integration
       - run: make docker-integration
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y openssh-server
+          make ssh-integration
       - run: go build -trimpath ./cmd/shelllane

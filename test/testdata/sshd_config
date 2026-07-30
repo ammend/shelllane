@@ -1,0 +1,12 @@
+Port SSH_PORT
+ListenAddress 127.0.0.1
+HostKey HOST_KEY
+PidFile PID_FILE
+AuthorizedKeysFile AUTHORIZED_KEYS
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitRootLogin yes
+StrictModes no
+UsePAM no
+PrintMotd no
+LogLevel ERROR

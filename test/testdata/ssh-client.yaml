@@ -1,0 +1,48 @@
+version: 1
+shells:
+  sh: /bin/sh
+identity:
+  env: SHELLLANE_IDENTITY
+  required: true
+state:
+  root: STATE_ROOT/client-unused
+routes:
+  - match:
+      identity: ssh-host-user
+    target: remote-host
+  - target: remote-container
+nodes:
+  localhost:
+    connector: ssh
+    address: 127.0.0.1
+    user: root
+    port: SSH_PORT
+    helper: REMOTE_HELPER
+    sshArgs:
+      - -i
+      - CLIENT_KEY
+      - -o
+      - UserKnownHostsFile=KNOWN_HOSTS
+runtimes:
+  host:
+    type: host
+    passEnv: [SHELLLANE_CONTEXT_*]
+  sandbox:
+    type: container
+    engine: docker
+    image: alpine@sha256:14358309a308569c32bdc37e2e0e9694be33a9d99e68afb0f5ff33cc1f695dce
+    user: "CONTAINER_USER"
+    pullPolicy: missing
+    workdir: /workspace
+    network: restricted
+    readOnly: true
+    passEnv: [SHELLLANE_CONTEXT_*]
+targets:
+  remote-host:
+    node: localhost
+    runtime: host
+  remote-container:
+    node: localhost
+    runtime: sandbox
+audit:
+  path: AUDIT_PATH

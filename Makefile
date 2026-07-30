@@ -1,4 +1,4 @@
-.PHONY: build test race vet check integration docker-integration clean
+.PHONY: build test race vet check integration docker-integration ssh-integration clean
 
 build:
 	mkdir -p bin
@@ -22,6 +22,9 @@ integration:
 
 docker-integration:
 	./test/docker-integration.sh
+
+ssh-integration:
+	./test/ssh-integration.sh
 
 clean:
 	rm -rf bin coverage.out
