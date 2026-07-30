@@ -53,6 +53,12 @@ ssh-keygen -q -t ed25519 -N '' -f "$test_dir/host_key"
 ssh-keygen -q -t ed25519 -N '' -f "$test_dir/client_key"
 cp "$test_dir/client_key.pub" "$test_dir/authorized_keys"
 
+if $use_sudo; then
+  sudo install -d -m 0755 /run/sshd
+else
+  install -d -m 0755 /run/sshd
+fi
+
 sed \
   -e "s|AUTHORIZED_KEYS|$test_dir/authorized_keys|" \
   -e "s|HOST_KEY|$test_dir/host_key|" \
