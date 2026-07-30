@@ -1,0 +1,57 @@
+# 场景：SSH 到远端工作节点，再由远端 helper 启动 Docker。
+# 适合：计算与状态放在远端，同时需要容器安全边界。
+version: 1
+
+shells:
+  sh: /bin/sh
+
+identity:
+  env: SHELLLANE_IDENTITY
+  required: true
+
+state:
+  root: /var/lib/shelllane/users
+
+routes:
+  - target: remote-sandbox
+
+nodes:
+  worker:
+    connector: ssh
+    address: worker.example.internal
+    user: shelllane
+    port: 22
+    helper: /usr/local/bin/shelllane
+    sshArgs:
+      - -o
+      - UserKnownHostsFile=/etc/shelllane/known_hosts
+      - -i
+      - /etc/shelllane/keys/worker
+
+runtimes:
+  sandbox:
+    type: container
+    engine: docker
+    image: alpine@sha256:14358309a308569c32bdc37e2e0e9694be33a9d99e68afb0f5ff33cc1f695dce
+    pullPolicy: missing
+    user: "1000:1000"
+    workdir: /workspace
+    network: restricted
+    readOnly: true
+    resources:
+      cpus: "2"
+      memory: 4g
+      pids: 512
+    passEnv:
+      - TERM
+      - LANG
+      - LC_*
+      - SHELLLANE_CONTEXT_*
+
+targets:
+  remote-sandbox:
+    node: worker
+    runtime: sandbox
+
+audit:
+  path: /var/log/shelllane/audit.jsonl

@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "ShellLane Architecture / 总体架构",
+    "subtitle": "A shell-compatible routing layer between launchers and execution backends",
+    "output": "docs/diagrams/shelllane-architecture.html",
+    "viewBox": [1400, 650]
+  },
+  "components": [
+    {"id": "launcher", "type": "external", "label": "上层应用", "sublabel": "bot / IDE / service", "pos": [30, 270], "size": [130, 64]},
+    {"id": "frontend", "type": "frontend", "label": "Shell Frontend", "sublabel": "bash / zsh / sh", "pos": [210, 270], "size": [135, 64]},
+    {"id": "identity", "type": "security", "label": "可信身份", "sublabel": "SHELLLANE_IDENTITY", "pos": [395, 125], "size": [150, 64]},
+    {"id": "router", "type": "backend", "label": "静态路由", "sublabel": "first-match-wins", "pos": [395, 270], "size": [150, 64]},
+    {"id": "config", "type": "database", "label": "YAML 配置", "sublabel": "routes / targets", "pos": [395, 430], "size": [150, 64]},
+    {"id": "target", "type": "messagebus", "label": "Target", "sublabel": "node(pool) + runtime", "pos": [595, 270], "size": [155, 64]},
+    {"id": "connector", "type": "cloud", "label": "Connector", "sublabel": "local / SSH", "pos": [800, 270], "size": [140, 64]},
+    {"id": "runtime", "type": "backend", "label": "Runtime", "sublabel": "host / container", "pos": [990, 270], "size": [140, 64]},
+    {"id": "state", "type": "database", "label": "用户状态", "sublabel": "HOME / workspace", "pos": [990, 125], "size": [140, 64]},
+    {"id": "shell", "type": "external", "label": "真实 Shell", "sublabel": "Agent CLI executes", "pos": [1180, 270], "size": [120, 64]}
+  ],
+  "boundaries": [
+    {"kind": "security-group", "label": "ShellLane Core", "wraps": ["identity", "router", "config", "target"]},
+    {"kind": "region", "label": "Selected execution node / 选定执行节点", "wraps": ["connector", "runtime", "state", "shell"]}
+  ],
+  "connections": [
+    {"from": "launcher", "to": "frontend", "label": "argv + env", "variant": "emphasis", "labelAt": [185, 348]},
+    {"from": "frontend", "to": "router", "variant": "emphasis"},
+    {"from": "identity", "to": "router", "variant": "security", "fromSide": "bottom", "toSide": "top"},
+    {"from": "config", "to": "router", "fromSide": "top", "toSide": "bottom"},
+    {"from": "router", "to": "target", "variant": "emphasis"},
+    {"from": "target", "to": "connector", "variant": "emphasis"},
+    {"from": "connector", "to": "runtime", "variant": "emphasis"},
+    {"from": "state", "to": "runtime", "fromSide": "bottom", "toSide": "top"},
+    {"from": "runtime", "to": "shell", "label": "exec", "variant": "emphasis"}
+  ],
+  "cards": [
+    {"dot": "cyan", "title": "Compatibility / 兼容", "items": ["上层只看到 bash/zsh/sh", "保留 argv、stdio、TTY、signal、exit code"]},
+    {"dot": "rose", "title": "Isolation / 隔离", "items": ["身份哈希选择独立状态目录", "容器可限制网络、资源、挂载与环境"]},
+    {"dot": "orange", "title": "Placement / 放置", "items": ["local 或 SSH 只负责连接", "host 或 container 只负责运行方式"]}
+  ]
+}

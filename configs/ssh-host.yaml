@@ -1,0 +1,53 @@
+# 场景：通过 SSH 到指定开发机，在远端 host runtime 运行 shell。
+# 适合：团队成员把 Agent CLI 绑定到自己的开发机与个人工作区。
+# 此配置可同时放在发起端和远端；远端 helper 只读取 state/runtimes。
+version: 1
+
+shells:
+  bash: /bin/bash
+  sh: /bin/sh
+
+identity:
+  env: SHELLLANE_IDENTITY
+  required: true
+
+state:
+  # 在远端机器上创建；不是发起端目录。
+  root: /var/lib/shelllane/users
+
+routes:
+  - target: developer-host
+
+nodes:
+  developer-machine:
+    connector: ssh
+    address: devbox.example.internal
+    user: shelllane
+    port: 22
+    helper: /usr/local/bin/shelllane
+    sshArgs:
+      - -o
+      - UserKnownHostsFile=/etc/shelllane/known_hosts
+      - -i
+      - /etc/shelllane/keys/developer-machine
+
+runtimes:
+  host:
+    type: host
+    profile: host
+    stateMode: isolated
+    workdir: "{workspace}"
+    # SSH 跨边界只透传 allowlist，其他上层环境变量不会进入远端。
+    passEnv:
+      - TERM
+      - LANG
+      - LC_*
+      - SHELLLANE_CONTEXT_*
+
+targets:
+  developer-host:
+    node: developer-machine
+    runtime: host
+
+audit:
+  path: /var/log/shelllane/audit.jsonl

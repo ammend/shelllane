@@ -1,4 +1,4 @@
-.PHONY: build test race vet check integration docker-integration ssh-integration clean
+.PHONY: build test race vet configs-check check integration docker-integration ssh-integration clean
 
 build:
 	mkdir -p bin
@@ -13,7 +13,12 @@ race:
 vet:
 	go vet ./...
 
-check: test race vet
+configs-check:
+	@for config in configs/*.yaml; do \
+		go run ./cmd/shelllane config check --config "$$config"; \
+	done
+
+check: test race vet configs-check
 	test -z "$$(gofmt -l .)"
 	git diff --check
 

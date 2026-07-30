@@ -1,0 +1,38 @@
+# 场景：在当前机器直接运行真实 shell。
+# 适合：可信管理员、单机开发、首次验证 ShellLane。
+version: 1
+
+shells:
+  bash: /bin/bash
+  sh: /bin/sh
+
+identity:
+  env: SHELLLANE_IDENTITY
+  required: true
+
+state:
+  root: /var/lib/shelllane/users
+
+# 空 match 是默认规则，必须放在最后。
+routes:
+  - target: local-host
+
+nodes:
+  this-machine:
+    connector: local
+
+runtimes:
+  host:
+    type: host
+    profile: host
+    stateMode: isolated
+    # 每个身份进入自己的 workspace，而不是继承上层应用 cwd。
+    workdir: "{workspace}"
+
+targets:
+  local-host:
+    node: this-machine
+    runtime: host
+
+audit:
+  path: /var/log/shelllane/audit.jsonl

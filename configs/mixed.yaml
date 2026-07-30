@@ -1,0 +1,92 @@
+# 场景：一个上层应用服务多类用户。
+# - 少量管理员：复用服务机现有 HOME。
+# - 指定团队成员：SSH 到个人开发机。
+# - 无法枚举的普通用户：稳定分配到两个远端容器节点。
+version: 1
+
+shells:
+  bash: /bin/bash
+  zsh: /usr/bin/zsh
+  sh: /bin/sh
+
+identity:
+  env: SHELLLANE_IDENTITY
+  argvEnvFallback: true
+  required: true
+
+state:
+  root: /var/lib/shelllane/users
+
+# 路由 first-match-wins：只枚举例外用户，普通用户走最终默认规则。
+routes:
+  - match:
+      identityIn: [admin@example, operator@example]
+    target: trusted-local
+  - match:
+      identity: developer@example
+    target: developer-host
+  - target: ordinary-pool
+
+nodes:
+  service:
+    connector: local
+  developer:
+    connector: ssh
+    address: devbox.example.internal
+    user: shelllane
+    helper: /usr/local/bin/shelllane
+    sshArgs: [-i, /etc/shelllane/keys/developer]
+  worker-a:
+    connector: ssh
+    address: worker-a.example.internal
+    user: shelllane
+    helper: /usr/local/bin/shelllane
+    sshArgs: [-i, /etc/shelllane/keys/workers]
+  worker-b:
+    connector: ssh
+    address: worker-b.example.internal
+    user: shelllane
+    helper: /usr/local/bin/shelllane
+    sshArgs: [-i, /etc/shelllane/keys/workers]
+
+nodePools:
+  ordinary-workers:
+    nodes: [worker-a, worker-b]
+    strategy: rendezvous-hash
+    storage: local
+    # 必须长期稳定；修改会导致大量用户换节点。
+    hashSeed: stable-deployment-v1
+
+runtimes:
+  host:
+    type: host
+    profile: host
+    stateMode: isolated
+    workdir: "{workspace}"
+  sandbox:
+    type: container
+    engine: docker
+    image: alpine@sha256:14358309a308569c32bdc37e2e0e9694be33a9d99e68afb0f5ff33cc1f695dce
+    pullPolicy: missing
+    user: "1000:1000"
+    workdir: /workspace
+    network: restricted
+    readOnly: true
+    resources: {cpus: "2", memory: 4g, pids: 512}
+    passEnv: [TERM, LANG, "LC_*", "SHELLLANE_CONTEXT_*"]
+
+targets:
+  trusted-local:
+    node: service
+    runtime: host
+    # 仅可信管理员可使用：这会复用 ShellLane 服务账号的真实 HOME。
+    stateMode: existing-home
+  developer-host:
+    node: developer
+    runtime: host
+  ordinary-pool:
+    nodePool: ordinary-workers
+    runtime: sandbox
+
+audit:
+  path: /var/log/shelllane/audit.jsonl

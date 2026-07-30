@@ -1,0 +1,51 @@
+# 场景：在当前机器为每个身份启动隔离容器。
+# 适合：没有个人开发机的普通用户、运行不可信 Agent CLI 命令。
+version: 1
+
+shells:
+  sh: /bin/sh
+
+identity:
+  env: SHELLLANE_IDENTITY
+  required: true
+
+state:
+  root: /var/lib/shelllane/users
+
+routes:
+  - target: local-sandbox
+
+nodes:
+  this-machine:
+    connector: local
+
+runtimes:
+  sandbox:
+    type: container
+    engine: docker
+    # 示例 digest 可直接运行；生产应换成包含所需 Agent CLI 的自有镜像。
+    image: alpine@sha256:14358309a308569c32bdc37e2e0e9694be33a9d99e68afb0f5ff33cc1f695dce
+    pullPolicy: missing
+    # 应与运行 ShellLane 的服务账号 UID:GID 一致。
+    user: "1000:1000"
+    workdir: /workspace
+    network: restricted
+    readOnly: true
+    resources:
+      cpus: "2"
+      memory: 4g
+      pids: 512
+    # 只透传明确允许的非敏感上下文。
+    passEnv:
+      - TERM
+      - LANG
+      - LC_*
+      - SHELLLANE_CONTEXT_*
+
+targets:
+  local-sandbox:
+    node: this-machine
+    runtime: sandbox
+
+audit:
+  path: /var/log/shelllane/audit.jsonl

@@ -1,152 +1,96 @@
 # ShellLane
 
-ShellLane is an identity-aware shell wrapper. It looks like `bash`, `zsh`, or
-`sh` to an existing application, but selects where that shell runs and which
-user state it sees.
+**[中文文档](README.zh-CN.md)**
 
-It is designed for launchers that already know the requesting user but should
-not bind every request to the service host. A small list of
-team members can use their own development machines, while all unlisted users
-fall through to an isolated default runtime.
+ShellLane is a shell-compatible execution router. It sits between an upstream
+launcher and a real `bash`, `zsh`, or `sh`, then selects an execution machine,
+runtime, and isolated user state from a trusted identity.
 
-> Status: early development (`v0.1`). Review the [security model](docs/security.md)
-> before exposing ShellLane to untrusted users.
+## Why
 
-## Principles
+Many applications invoke Agent CLIs—Codex, Claude Code, Trae Agent, and
+others—through ordinary system shell commands. That keeps integrations simple,
+but couples every request to the launcher's machine, HOME, credentials, and
+workspace.
 
-- Preserve the shell contract; do not add Codex-, Claude-, or agent-specific logic.
-- Treat identity, placement, transport, and runtime as separate concerns.
-- Enumerate exceptional users, not the potentially unbounded default population.
-- Keep routing static and deterministic. ShellLane exposes an abstraction seam,
-  but is not a general-purpose scheduler.
-- Start with local/SSH transport and host/container runtimes.
+ShellLane preserves that command-line contract while moving execution policy
+into a small, reusable middle layer:
 
-## Model
+- a developer can run on their own machine through SSH;
+- ordinary users can run in isolated local or remote containers;
+- administrators can use a trusted local host runtime;
+- the upstream application and Agent CLI require no vendor-specific adapter.
 
-```text
-shell invocation
-  └─ ShellLane (bash | zsh | sh)
-       └─ identity → ordered route → target
-                                    ├─ node or nodePool
-                                    └─ host or container runtime
-```
+ShellLane is not a bot gateway or Agent framework. It routes shell execution.
 
-A node chooses the transport (`local` or `ssh`). A runtime chooses execution
-(`host` or `container`). Their product provides four useful backends without
-four separate implementations:
+## Backends
 
 | Connector | Runtime | Result |
 | --- | --- | --- |
-| local | host | Shell on the service machine |
-| local | container | Isolated local container |
-| ssh | host | Shell on a developer/worker machine |
-| ssh | container | Container on a developer/worker machine |
+| `local` | `host` | Real shell on the launcher machine |
+| `local` | `container` | Local Docker/Podman sandbox |
+| `ssh` | `host` | Real shell on a remote development machine |
+| `ssh` | `container` | Docker/Podman sandbox on a remote worker |
 
-Node pools use rendezvous hashing, so an ordinary user is pinned
-deterministically to one of several machines. This is placement, not a dynamic
-capacity scheduler.
+Targets combine placement (`node` or `nodePool`) with a runtime. Ordered routes
+map exceptional identities explicitly and send everyone else to a required
+default target.
 
-## Quick start
+## Start here
 
-Requirements: Go 1.24 or newer. Docker/Podman and SSH are only needed for their
-respective backends.
+1. Read the [architecture and request flow](docs/architecture.md).
+2. Pick a copy-ready configuration from [`configs/`](configs/README.md).
+3. Follow the [configuration reference](docs/configuration.md).
+4. Review the [security model](docs/security.md).
 
 ```bash
 make build
-cp config.example.yaml ~/.config/shelllane/config.yaml
-mkdir -p ~/.local/lib/shelllane/users ~/.local/bin/shelllane-shells
-ln -s "$PWD/bin/shelllane" ~/.local/bin/shelllane-shells/bash
-ln -s "$PWD/bin/shelllane" ~/.local/bin/shelllane-shells/zsh
-ln -s "$PWD/bin/shelllane" ~/.local/bin/shelllane-shells/sh
+sudo install -m 0755 bin/shelllane /usr/local/bin/shelllane
+sudo install -d /usr/local/lib/shelllane
+sudo ln -s /usr/local/bin/shelllane /usr/local/lib/shelllane/bash
+sudo install -d -m 0700 -o "$USER" /var/lib/shelllane/users
+sudo install -d -m 0700 -o "$USER" /var/log/shelllane
 
-SHELLLANE_CONFIG="$HOME/.config/shelllane/config.yaml" \
-SHELLLANE_IDENTITY=user@example \
-~/.local/bin/shelllane-shells/bash -lc 'echo "$HOME"'
+export SHELLLANE_CONFIG="$PWD/configs/local-host.yaml"
+export SHELLLANE_IDENTITY="user@example"
+/usr/local/lib/shelllane/bash -lc 'printf "%s\n" "$HOME"'
 ```
 
-Validate configuration and preview a route before changing `launchShell`:
+Validate before deployment:
 
 ```bash
-shelllane config check --config /etc/shelllane/config.yaml
-shelllane route test --identity ou_example --config /etc/shelllane/config.yaml
-shelllane doctor --config /etc/shelllane/config.yaml
+shelllane config check --config configs/local-host.yaml
+shelllane route test --config configs/mixed.yaml --identity developer@example
+shelllane doctor --config configs/mixed.yaml
 ```
 
-## Identity and state
+## Visual guides
 
-The default trusted identity is `SHELLLANE_IDENTITY`. An argv-style
-`SHELLLANE_IDENTITY=value` fallback can be enabled for launchers that cannot
-set process environment; ShellLane consumes that argument before invoking the
-real shell. If both sources exist and disagree, execution fails closed.
+- [Interactive architecture diagram](docs/diagrams/shelllane-architecture.html)
+- [Interactive SSH + container sequence](docs/diagrams/ssh-container-sequence.html)
 
-Raw identities are never used in filesystem paths. A SHA-256 digest selects:
+Both Archify diagrams are standalone HTML with dark/light themes and one-click
+PNG, JPEG, WebP, and SVG export. Their maintainable JSON sources live in
+[`docs/diagrams/source/`](docs/diagrams/source/).
 
-```text
-<state-root>/<identity-hash>/
-├── shared/
-│   ├── config/
-│   ├── credentials/
-│   ├── data/
-│   ├── state/
-│   └── workspace/
-├── profiles/<runtime-profile>/
-│   ├── home/
-│   └── cache/
-└── tmp/
-```
+## Integrations
 
-This state lives on the execution node. With a node pool, rendezvous hashing
-keeps a user on the same node. Moving state between nodes is deliberately
-outside v0.1; use shared storage or an external synchronization mechanism if
-mobility is required.
+Any launcher that can choose a shell executable and provide a trusted identity
+can use ShellLane. For example, botmux can set `launchShell` to a ShellLane
+symlink and map its authenticated sender to `SHELLLANE_IDENTITY`. The same
+pattern applies to IDE services, internal automation, web terminals, and job
+runners.
 
-## Configuration
-
-See [configuration.md](docs/configuration.md) for a field-by-field reference,
-[config.example.yaml](config.example.yaml) for a complete non-secret example,
-and [architecture.md](docs/architecture.md) for execution details.
-Ordered routes are first-match-wins and must end in a default route.
-
-Container images are explicit configuration. Production deployments should
-pin an immutable digest, use a non-root image user, and grant only the mounts
-and network access that workload needs.
-
-## Compatibility
-
-ShellLane passes the original shell argv through unchanged and uses
-`exec(2)` for the final process. TTY/stdin/stdout/stderr therefore remain
-attached end-to-end. SSH forces or disables a remote PTY to match the incoming
-invocation. See [compatibility.md](docs/compatibility.md) for the exact contract
-and current boundaries.
-
-## Development
+## Quality
 
 ```bash
 make check
+make configs-check
 make integration
 make docker-integration
 make ssh-integration
 ```
 
-The project uses the standard Go toolchain and has no runtime Go dependencies
-except YAML parsing. See [CONTRIBUTING.md](CONTRIBUTING.md).
+CI exercises real local host, Docker, SSH-to-host, and SSH-to-Docker paths.
 
-## Non-goals for v0.1
-
-- Bot request distribution, chat protocol handling, or device registration
-- A reverse-connected agent or public control-plane port
-- Kubernetes integration or a dynamic scheduler
-- Credential synchronization across machines
-- Web UI, database, queues, or agent-specific adapters
-
-## License
-
-Apache License 2.0. See [LICENSE](LICENSE).
-
-## Integrations
-
-ShellLane is launcher-agnostic. For botmux, configure a bot's custom
-`launchShell` as the matching ShellLane symlink, such as
-`/opt/shelllane/bin/bash`, and map the authenticated sender identity into
-`SHELLLANE_IDENTITY`. This is one integration example, not part of ShellLane's
-architecture.
+Apache-2.0. See [LICENSE](LICENSE).

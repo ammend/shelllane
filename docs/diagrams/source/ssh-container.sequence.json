@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "SSH + Container Request / 请求顺序",
+    "subtitle": "From an upstream shell invocation to a remote isolated Agent CLI",
+    "output": "docs/diagrams/ssh-container-sequence.html",
+    "viewBox": [820, 780]
+  },
+  "participants": [
+    {"id": "app", "type": "external", "label": "上层应用", "sublabel": "launcher"},
+    {"id": "frontend", "type": "frontend", "label": "ShellLane", "sublabel": "shell frontend"},
+    {"id": "router", "type": "backend", "label": "Router", "sublabel": "identity policy"},
+    {"id": "ssh", "type": "cloud", "label": "OpenSSH", "sublabel": "connector"},
+    {"id": "helper", "type": "backend", "label": "远端 Helper", "sublabel": "run-remote"},
+    {"id": "docker", "type": "backend", "label": "Docker", "sublabel": "runtime"},
+    {"id": "agent", "type": "external", "label": "Agent CLI", "sublabel": "real shell"}
+  ],
+  "segments": [
+    {"from": 150, "to": 315, "label": "01 / Resolve"},
+    {"from": 325, "to": 510, "label": "02 / Transport"},
+    {"from": 520, "to": 695, "label": "03 / Execute"}
+  ],
+  "messages": [
+    {"from": "app", "to": "frontend", "y": 185, "label": "invoke bash + identity", "variant": "emphasis"},
+    {"from": "frontend", "to": "router", "y": 225, "label": "resolve identity", "variant": "security"},
+    {"from": "router", "to": "frontend", "y": 265, "label": "target = node + runtime", "variant": "return"},
+    {"from": "frontend", "to": "ssh", "y": 345, "label": "versioned request", "variant": "emphasis"},
+    {"from": "ssh", "to": "helper", "y": 390, "label": "encrypted stdin/stdout + PTY", "variant": "security"},
+    {"from": "helper", "to": "docker", "y": 535, "label": "run isolated container", "variant": "emphasis"},
+    {"from": "docker", "to": "agent", "y": 580, "label": "exec real shell", "variant": "emphasis"},
+    {"from": "agent", "to": "app", "y": 650, "label": "output + exit code", "variant": "return"}
+  ],
+  "activations": [
+    {"participant": "frontend", "from": 180, "to": 355, "type": "frontend"},
+    {"participant": "router", "from": 220, "to": 275, "type": "backend"},
+    {"participant": "ssh", "from": 340, "to": 665, "type": "cloud"},
+    {"participant": "helper", "from": 385, "to": 665, "type": "backend"},
+    {"participant": "docker", "from": 530, "to": 665, "type": "backend"},
+    {"participant": "agent", "from": 575, "to": 655, "type": "external"}
+  ],
+  "cards": [
+    {"dot": "rose", "title": "Trust boundary / 信任边界", "items": ["SSH 验证主机与远端账号", "仅 allowlist 环境进入远端请求"]},
+    {"dot": "emerald", "title": "Shell contract / Shell 契约", "items": ["stdin/stdout/PTY 保持端到端连接", "最终退出码返回原上层进程"]},
+    {"dot": "orange", "title": "Failure / 失败语义", "items": ["SSH 或 Docker 失败即失败", "不静默回落到本机或 host"]}
+  ]
+}

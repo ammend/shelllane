@@ -1,0 +1,127 @@
+# ShellLane
+
+ShellLane 是一个兼容 `bash`、`zsh`、`sh` 调用方式的执行路由层。上层应用仍然像调用
+系统 Shell 一样启动 Agent CLI，ShellLane 在中间根据可信用户身份，决定去哪个机器、
+使用 host 还是容器运行，以及挂载哪一份用户状态。
+
+## 为什么要做
+
+现在很多上层应用直接通过系统命令行调用 Codex、Claude Code（CC）、Trae Agent
+或其他 Agent CLI。这种方式足够通用，不需要为每一种 Agent 写 SDK 适配器，但也带来
+几个问题：
+
+- 所有请求默认绑定在上层应用所在机器；
+- 不同用户容易共享 HOME、配置、凭据、缓存和工作目录；
+- 团队成员希望使用自己的开发机，普通用户又可能没有开发机；
+- 容器、SSH、物理机等执行方式会侵入上层应用代码；
+- 上层应用一旦自己处理身份、路由、SSH、Docker，就逐渐变成复杂的调度平台。
+
+ShellLane 只解决中间这一层：
+
+```text
+上层应用
+  → 像往常一样调用 bash/zsh/sh
+  → ShellLane 根据身份选择 Target
+  → local 或 SSH
+  → host 或 container
+  → Codex / CC / Trae / 其他 Agent CLI
+```
+
+上层应用不用知道 Docker、SSH 或用户目录怎么组织；Agent CLI 也仍然只看到普通
+Shell 环境。ShellLane 不处理聊天消息，不理解 prompt，也不是 Bot 网关或 Agent 框架。
+
+## 四种直接可用的运行方式
+
+| 连接方式 | 运行方式 | 典型用途 | 配置 |
+| --- | --- | --- | --- |
+| local | host | 管理员、单机开发 | [`local-host.yaml`](configs/local-host.yaml) |
+| local | container | 普通用户本机容器隔离 | [`local-docker.yaml`](configs/local-docker.yaml) |
+| SSH | host | 团队成员自己的开发机 | [`ssh-host.yaml`](configs/ssh-host.yaml) |
+| SSH | container | 远端工作节点容器隔离 | [`ssh-docker.yaml`](configs/ssh-docker.yaml) |
+
+管理员、团队成员、普通用户混合路由见
+[`mixed.yaml`](configs/mixed.yaml)。
+
+## 三分钟体验
+
+```bash
+make build
+sudo install -m 0755 bin/shelllane /usr/local/bin/shelllane
+sudo mkdir -p /usr/local/lib/shelllane
+sudo ln -s /usr/local/bin/shelllane /usr/local/lib/shelllane/bash
+sudo install -d -m 0700 -o "$USER" /var/lib/shelllane/users
+sudo install -d -m 0700 -o "$USER" /var/log/shelllane
+
+export SHELLLANE_CONFIG="$PWD/configs/local-host.yaml"
+export SHELLLANE_IDENTITY="user@example"
+/usr/local/lib/shelllane/bash -lc 'echo "HOME=$HOME"; pwd'
+```
+
+在接入上层应用前先检查配置和路由：
+
+```bash
+shelllane config check --config configs/mixed.yaml
+shelllane route test --config configs/mixed.yaml --identity admin@example
+shelllane route test --config configs/mixed.yaml --identity developer@example
+shelllane route test --config configs/mixed.yaml --identity any-normal-user
+```
+
+## 身份与隔离
+
+上层应用把已经认证过的用户标识放入 `SHELLLANE_IDENTITY`。ShellLane 使用原始值做
+精确路由，但只把 SHA-256 哈希写入目录和审计：
+
+```text
+/var/lib/shelllane/users/<identity-hash>/
+├── shared/
+│   ├── config/       # 跨 runtime 复用的工具配置
+│   ├── credentials/  # 需要显式挂载的凭据
+│   ├── data/
+│   ├── state/
+│   └── workspace/
+├── profiles/<profile>/
+│   ├── home/
+│   └── cache/
+└── tmp/
+```
+
+少量例外用户可以显式配置；无法枚举的大量普通用户由最后一条默认路由覆盖。两台或
+多台工作机组成 NodePool 时，Rendezvous Hash 让同一身份稳定落到同一节点。
+
+## 图解
+
+- [交互式总体架构图](docs/diagrams/shelllane-architecture.html)
+- [交互式 SSH + Docker 请求顺序图](docs/diagrams/ssh-container-sequence.html)
+- [架构与请求流中文说明](docs/zh-CN/architecture.md)
+
+图由 Archify 生成，支持深浅色切换，可直接导出 PNG、JPEG、WebP、SVG。
+
+## 文档导航
+
+- [按场景选择配置](configs/README.zh-CN.md)
+- [中文配置教程](docs/zh-CN/configuration.md)
+- [完整字段参考（英文）](docs/configuration.md)
+- [中文安全模型](docs/zh-CN/security.md)
+- [完整安全模型（英文）](docs/security.md)
+- [Shell 兼容边界](docs/compatibility.md)
+
+## 接入 botmux 等上层应用
+
+botmux 只是一个用途示例。把某个 Bot 的 `launchShell` 指向
+`/usr/local/lib/shelllane/bash`，并把已经认证的消息发送者映射到
+`SHELLLANE_IDENTITY` 即可。Codex、CC、Trae 或其他 CLI 的启动参数不需要由
+ShellLane 理解。
+
+IDE 服务、Web Terminal、内部任务平台和 CI Runner 也可以用相同方式接入。
+
+## 验收
+
+```bash
+make check               # unit / race / vet / format
+make configs-check       # 仓库内所有示例配置
+make integration         # 真实 local + host
+make docker-integration  # 真实 local + Docker
+make ssh-integration     # 临时 localhost sshd，覆盖 SSH + host/container
+```
+
+Apache-2.0，见 [LICENSE](LICENSE)。
