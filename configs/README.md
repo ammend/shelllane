@@ -30,5 +30,10 @@ The SSH examples can be installed on both initiating and remote machines. The
 remote `run-remote` helper consumes the requested runtime and local state root;
 routes are used by the initiating frontend.
 
+SSH templates leave `sshArgs` unset by default and reuse the service account's
+standard `~/.ssh` configuration, known hosts, and default identity. Dedicated
+`/etc/shelllane` keys and known-hosts files are optional hardening extensions,
+not assumed prerequisites.
+
 See the [field reference](../docs/configuration.md) and
 [Chinese scenario guide](README.zh-CN.md).

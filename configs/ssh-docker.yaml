@@ -31,11 +31,8 @@ nodes:
     user: shelllane
     port: 22
     helper: /usr/local/bin/shelllane
-    sshArgs:
-      - -o
-      - UserKnownHostsFile=/etc/shelllane/known_hosts
-      - -i
-      - /etc/shelllane/keys/worker
+    # 默认使用运行账号已有的标准 SSH 配置；专用 key/known_hosts 可通过
+    # sshArgs 显式扩展，详见 docs/zh-CN/configuration.md。
 
 runtimes:
   sandbox:

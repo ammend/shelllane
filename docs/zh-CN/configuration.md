@@ -149,6 +149,7 @@ nodes:
     address: worker.example.internal
     user: shelllane
     helper: /usr/local/bin/shelllane
+    # 可选：只有这些文件已经部署时才启用
     sshArgs:
       - -o
       - UserKnownHostsFile=/etc/shelllane/known_hosts
@@ -156,8 +157,10 @@ nodes:
       - /etc/shelllane/keys/worker
 ```
 
-远端需要兼容版本的 ShellLane、低权限账号、key/known_hosts、可写 state root 和同名
-runtime。SSH 只透传 runtime `passEnv` 允许的环境。
+`sshArgs` 是可选扩展，不是默认必需项。不设置时使用运行账号标准的 `~/.ssh` 配置；
+设置不存在的 `/etc/shelllane/...` 文件会直接导致 SSH 启动失败。远端需要兼容版本的
+ShellLane、低权限账号、可用的 SSH 认证/known_hosts、可写 state root 和同名 runtime。
+SSH 只透传 runtime `passEnv` 允许的环境。
 
 ## Host runtime
 

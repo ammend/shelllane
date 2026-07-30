@@ -44,19 +44,19 @@ nodes:
     address: devbox.example.internal
     user: shelllane
     helper: /usr/local/bin/shelllane
-    sshArgs: [-i, /etc/shelllane/keys/developer]
+    # 可选扩展：sshArgs: [-i, /etc/shelllane/keys/developer]
   worker-a:
     connector: ssh
     address: worker-a.example.internal
     user: shelllane
     helper: /usr/local/bin/shelllane
-    sshArgs: [-i, /etc/shelllane/keys/workers]
+    # 可选扩展：sshArgs: [-i, /etc/shelllane/keys/workers]
   worker-b:
     connector: ssh
     address: worker-b.example.internal
     user: shelllane
     helper: /usr/local/bin/shelllane
-    sshArgs: [-i, /etc/shelllane/keys/workers]
+    # 可选扩展：sshArgs: [-i, /etc/shelllane/keys/workers]
 
 nodePools:
   ordinary-workers:

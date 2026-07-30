@@ -219,10 +219,15 @@ nodes:
     user: shelllane
     port: 22
     helper: /usr/local/bin/shelllane
+    # Optional hardening after this file has been provisioned:
     sshArgs:
       - -o
       - UserKnownHostsFile=/etc/shelllane/known_hosts
 ```
+
+`sshArgs` is optional. When omitted, OpenSSH uses the executing account's
+standard configuration, known-hosts file, and default identities. Do not copy
+the `/etc/shelllane/...` example into an active config until those files exist.
 
 | Field | Applies to | Default | Meaning |
 | --- | --- | --- | --- |

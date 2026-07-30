@@ -34,11 +34,13 @@ nodes:
     user: shelllane
     port: 22
     helper: /usr/local/bin/shelllane
-    sshArgs:
-      - -o
-      - UserKnownHostsFile=/etc/shelllane/known_hosts
-      - -i
-      - /etc/shelllane/keys/developer-machine
+    # 默认复用运行账号的 ~/.ssh/config、known_hosts 和默认私钥。
+    # 常驻服务需要专用文件时再启用：
+    # sshArgs:
+    #   - -o
+    #   - UserKnownHostsFile=/etc/shelllane/known_hosts
+    #   - -i
+    #   - /etc/shelllane/keys/developer-machine
 
 runtimes:
   host:

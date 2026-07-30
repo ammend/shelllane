@@ -58,6 +58,11 @@ Agent CLI 的固定 digest 镜像。
 4. 让远端账号可写 `state.root`；
 5. 在远端放置包含同名 `host` runtime 的配置。
 
+模板默认不设置 `sshArgs`，会复用运行 ShellLane 账号的 `~/.ssh/config`、
+`~/.ssh/known_hosts` 和默认私钥，避免引用尚未创建的 `/etc/shelllane/...` 导致开箱
+即失败。常驻服务需要专用 key 或 known_hosts 时，再取消 YAML 中的注释或显式增加
+`sshArgs`。ShellLane 仍固定启用 `BatchMode=yes` 和 `StrictHostKeyChecking=yes`。
+
 ## SSH + Docker
 
 使用 [`ssh-docker.yaml`](ssh-docker.yaml)。
