@@ -215,13 +215,21 @@ func stripIdentityArg(argv []string, cfg config.IdentityConfig) []string {
 	if !cfg.ArgvEnvFallback {
 		return append([]string(nil), argv...)
 	}
-	prefix := cfg.Env + "="
+	names := identity.EnvNames(cfg)
 	result := make([]string, 0, len(argv))
 	for index, arg := range argv {
-		if index != 0 && strings.HasPrefix(arg, prefix) {
-			continue
+		identityArg := false
+		if index != 0 {
+			for _, name := range names {
+				if strings.HasPrefix(arg, name+"=") {
+					identityArg = true
+					break
+				}
+			}
 		}
-		result = append(result, arg)
+		if !identityArg {
+			result = append(result, arg)
+		}
 	}
 	return result
 }

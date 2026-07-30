@@ -102,7 +102,7 @@ identity:
   env: SHELLLANE_IDENTITY
   envMap:
     SHELLLANE_IDENTITY: "$UPSTREAM_USER_ID"
-  argvEnvFallback: false
+  argvEnvFallback: true
   required: true
   hash: sha256
 ```
@@ -111,7 +111,7 @@ identity:
 | --- | --- | --- |
 | `env` | `SHELLLANE_IDENTITY` | Trusted environment variable containing the upstream identity. |
 | `envMap` | none | Maps the canonical identity to an environment variable the launcher already exports, for example `SHELLLANE_IDENTITY: "$BOTMUX_USER_ID"`. |
-| `argvEnvFallback` | `false` | Also accept and consume an argv item such as `SHELLLANE_IDENTITY=alice`. |
+| `argvEnvFallback` | `false` | Also accept and consume canonical or mapped argv metadata, such as `SHELLLANE_IDENTITY=alice` or `UPSTREAM_USER_ID=alice`. |
 | `required` | `true` | Fail closed when no identity exists. If false, use `anonymous`. |
 | `hash` | `sha256` | Path-safe identity derivation; currently the only supported algorithm. |
 
@@ -125,9 +125,11 @@ identity:
 ```bash
 SHELLLANE_IDENTITY=alice /path/to/bash -lc 'agent-cli ...'
 /path/to/bash SHELLLANE_IDENTITY=alice -lc 'agent-cli ...'
+/path/to/bash UPSTREAM_USER_ID=alice -lc 'agent-cli ...'
 ```
 
-ShellLane scans `argv[1:]`, consumes every matching metadata item, and forwards
+The last form uses the source declared by `envMap`. ShellLane scans `argv[1:]`,
+consumes every matching canonical or mapped metadata item, and forwards
 the remaining argv unchanged. The real Bash receives only
 `bash -lc 'agent-cli ...'`. Identity values are identifiers, not secrets; argv
 may be briefly observable in the local process list.

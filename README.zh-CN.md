@@ -83,14 +83,14 @@ shelllane route test --config configs/mixed.yaml --identity any-normal-user
 系统服务：/etc/shelllane/config.yaml
 ```
 
-例如用户 `liudongwei` 未设置 `XDG_CONFIG_HOME` 时，默认运行配置是：
+例如用户 `ammend` 未设置 `XDG_CONFIG_HOME` 时，默认运行配置是：
 
 ```text
-/home/liudongwei/.config/shelllane/config.yaml
+/home/ammend/.config/shelllane/config.yaml
 ```
 
-不是 `/home/liudongwei/configs/local-host.yaml`。后者只有在仓库正好位于
-`/home/liudongwei` 时才是一个模板文件。
+不是 `/home/ammend/configs/local-host.yaml`。后者只有在仓库正好位于
+`/home/ammend` 时才是一个模板文件。
 
 ## 映射上层已有的身份变量
 
@@ -102,6 +102,7 @@ identity:
   env: SHELLLANE_IDENTITY
   envMap:
     SHELLLANE_IDENTITY: "$BOTMUX_USER_ID"
+  argvEnvFallback: true
   required: true
 ```
 
@@ -109,6 +110,15 @@ identity:
 `SHELLLANE_IDENTITY=ou_xxx`，用于路由和隔离。这个映射只发生在 ShellLane 内部，不会
 要求上游动态增加环境变量，也不会修改真实 Shell 收到的环境。若 canonical 变量和映射
 来源同时存在但值不同，ShellLane 会以 `identity_conflict` 拒绝执行。
+
+如果 launcher 把自己已有的变量追加在 Shell 可执行文件后，同一个映射也会生效：
+
+```bash
+/usr/local/lib/shelllane/bash BOTMUX_USER_ID=alice -lc 'pwd'
+```
+
+启用 `argvEnvFallback: true` 后，ShellLane 读取并消费
+`BOTMUX_USER_ID=alice`，真实 Bash 最终只收到 `bash -lc 'pwd'`。
 
 ## 上层把身份变量放在 Bash 后面时（兼容模式）
 

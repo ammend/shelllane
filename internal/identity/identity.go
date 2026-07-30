@@ -24,38 +24,38 @@ type Identity struct {
 }
 
 func Resolve(cfg config.IdentityConfig, args []string, getenv func(string) string) (Identity, error) {
-	fromEnv := strings.TrimSpace(getenv(cfg.Env))
-	envSource := cfg.Env
-	if expression, ok := cfg.EnvMap[cfg.Env]; ok {
-		sourceName := envName(expression)
-		mapped := strings.TrimSpace(getenv(sourceName))
-		if fromEnv != "" && mapped != "" && fromEnv != mapped {
-			return Identity{}, fmt.Errorf("%w: %s and mapped %s disagree", ErrConflict, cfg.Env, sourceName)
-		}
-		if fromEnv == "" {
-			fromEnv, envSource = mapped, sourceName
+	type candidate struct {
+		value  string
+		source string
+	}
+	var candidates []candidate
+	envNames := EnvNames(cfg)
+	for _, name := range envNames {
+		if value := strings.TrimSpace(getenv(name)); value != "" {
+			candidates = append(candidates, candidate{value: value, source: "env:" + name})
 		}
 	}
-	fromArgv := ""
 	if cfg.ArgvEnvFallback {
-		prefix := cfg.Env + "="
 		for _, arg := range args[1:] {
-			if !strings.HasPrefix(arg, prefix) {
-				continue
+			for _, name := range envNames {
+				prefix := name + "="
+				if strings.HasPrefix(arg, prefix) {
+					value := strings.TrimSpace(strings.TrimPrefix(arg, prefix))
+					if value != "" {
+						candidates = append(candidates, candidate{value: value, source: "argv:" + name})
+					}
+				}
 			}
-			candidate := strings.TrimPrefix(arg, prefix)
-			if fromArgv != "" && fromArgv != candidate {
-				return Identity{}, fmt.Errorf("%w: multiple %s values in argv", ErrConflict, cfg.Env)
-			}
-			fromArgv = candidate
 		}
 	}
-	if fromEnv != "" && fromArgv != "" && fromEnv != fromArgv {
-		return Identity{}, fmt.Errorf("%w: env and argv disagree", ErrConflict)
-	}
-	value, source := fromEnv, "env:"+envSource
-	if value == "" {
-		value, source = fromArgv, "argv:"+cfg.Env
+	value, source := "", ""
+	for _, candidate := range candidates {
+		if value != "" && value != candidate.value {
+			return Identity{}, fmt.Errorf("%w: identity sources disagree", ErrConflict)
+		}
+		if value == "" {
+			value, source = candidate.value, candidate.source
+		}
 	}
 	if value == "" {
 		if cfg.Required == nil || *cfg.Required {
@@ -72,6 +72,19 @@ func Resolve(cfg config.IdentityConfig, args []string, getenv func(string) strin
 		Hash:   hex.EncodeToString(sum[:]),
 		Source: source,
 	}, nil
+}
+
+// EnvNames returns the canonical identity variable followed by any mapped
+// upstream variable. Callers use the same list for resolution and argv
+// metadata removal.
+func EnvNames(cfg config.IdentityConfig) []string {
+	names := []string{cfg.Env}
+	if expression, ok := cfg.EnvMap[cfg.Env]; ok {
+		if mapped := envName(expression); mapped != "" && mapped != cfg.Env {
+			names = append(names, mapped)
+		}
+	}
+	return names
 }
 
 func envName(expression string) string {

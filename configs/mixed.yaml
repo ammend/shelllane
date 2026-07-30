@@ -15,7 +15,8 @@ identity:
   # already provides. The launcher does not need to create a new variable.
   envMap:
     SHELLLANE_IDENTITY: "$BOTMUX_USER_ID"
-  argvEnvFallback: false
+  # Also accept: /path/to/bash BOTMUX_USER_ID=alice -lc 'pwd'
+  argvEnvFallback: true
   required: true
 
 state:

@@ -93,11 +93,18 @@ identity:
   env: SHELLLANE_IDENTITY
   envMap:
     SHELLLANE_IDENTITY: "$BOTMUX_USER_ID"
+  argvEnvFallback: true
   required: true
 ```
 
 If both variables exist and disagree, ShellLane fails closed with
 `identity_conflict`.
+
+The mapped source name is also accepted in argv compatibility mode:
+
+```bash
+/usr/local/lib/shelllane/bash BOTMUX_USER_ID=alice -lc 'pwd'
+```
 
 ## Identity appended after Bash (compatibility)
 

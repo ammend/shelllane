@@ -20,9 +20,9 @@ cp configs/local-host.yaml \
   "${XDG_CONFIG_HOME:-$HOME/.config}/shelllane/config.yaml"
 ```
 
-因此 `/home/liudongwei/configs/local-host.yaml` 只在仓库恰好位于
-`/home/liudongwei` 时才是模板路径；正常运行路径应是
-`/home/liudongwei/.config/shelllane/config.yaml`。
+因此 `/home/ammend/configs/local-host.yaml` 只在仓库恰好位于
+`/home/ammend` 时才是模板路径；正常运行路径应是
+`/home/ammend/.config/shelllane/config.yaml`。
 
 未知字段、错误引用和不支持的值会直接报错。部署前执行：
 
@@ -53,7 +53,7 @@ identity:
   env: SHELLLANE_IDENTITY
   envMap:
     SHELLLANE_IDENTITY: "$BOTMUX_USER_ID"
-  argvEnvFallback: false
+  argvEnvFallback: true
   required: true
 ```
 
@@ -74,10 +74,13 @@ SHELLLANE_IDENTITY=user@example /path/to/bash -lc 'codex ...'
 
 # 兼容：launcher 把 KEY=value 放在 bash 后的 argv 中
 /path/to/bash SHELLLANE_IDENTITY=user@example -lc 'codex ...'
+
+# envMap 中声明的源变量也可以放在 bash 后
+/path/to/bash BOTMUX_USER_ID=user@example -lc 'codex ...'
 ```
 
-第二种方式只有在 `argvEnvFallback: true` 时启用。ShellLane 扫描 `argv[1:]` 中与
-`identity.env` 同名的 `KEY=value`，完成解析后删除所有这些元数据参数，所以真实 Bash
+后两种方式只有在 `argvEnvFallback: true` 时启用。ShellLane 扫描 `argv[1:]` 中与
+`identity.env` 或 `envMap` 来源同名的 `KEY=value`，完成解析后删除所有这些元数据参数，所以真实 Bash
 最终只收到 `bash -lc 'codex ...'`。身份不是 secret；argv 在 ShellLane 消费前可能被
 同机进程列表短暂看到。
 
