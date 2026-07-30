@@ -46,12 +46,7 @@ default target.
 4. Review the [security model](docs/security.md).
 
 ```bash
-make build
-sudo install -m 0755 bin/shelllane /usr/local/bin/shelllane
-sudo install -d /usr/local/lib/shelllane
-sudo ln -s /usr/local/bin/shelllane /usr/local/lib/shelllane/bash
-sudo install -d -m 0700 -o "$USER" /var/lib/shelllane/users
-sudo install -d -m 0700 -o "$USER" /var/log/shelllane
+sudo make install
 
 mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/shelllane"
 cp configs/local-host.yaml \
@@ -59,6 +54,19 @@ cp configs/local-host.yaml \
 export SHELLLANE_IDENTITY="user@example"
 /usr/local/lib/shelllane/bash -lc 'printf "%s\n" "$HOME"'
 ```
+
+`make install` builds the binary, installs it under `/usr/local/bin`, creates
+the `bash`, `zsh`, and `sh` wrapper links, and prepares state/log directories
+for the invoking user. Under `sudo`, `SUDO_USER` is used instead of `root`.
+Install locations are customizable:
+
+```bash
+sudo make install PREFIX=/opt/shelllane RUNTIME_USER=agent
+make install DESTDIR=/tmp/package-root RUNTIME_USER="$USER"
+```
+
+`make uninstall` removes only the binary and wrapper links; configuration,
+state, and logs are deliberately preserved.
 
 Validate before deployment:
 

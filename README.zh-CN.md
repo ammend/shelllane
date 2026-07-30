@@ -47,12 +47,7 @@ Shell 环境。ShellLane 不处理聊天消息，不理解 prompt，也不是 Bo
 ## 三分钟体验
 
 ```bash
-make build
-sudo install -m 0755 bin/shelllane /usr/local/bin/shelllane
-sudo mkdir -p /usr/local/lib/shelllane
-sudo ln -s /usr/local/bin/shelllane /usr/local/lib/shelllane/bash
-sudo install -d -m 0700 -o "$USER" /var/lib/shelllane/users
-sudo install -d -m 0700 -o "$USER" /var/log/shelllane
+sudo make install
 
 mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/shelllane"
 cp configs/local-host.yaml \
@@ -60,6 +55,17 @@ cp configs/local-host.yaml \
 export SHELLLANE_IDENTITY="user@example"
 /usr/local/lib/shelllane/bash -lc 'echo "HOME=$HOME"; pwd'
 ```
+
+`make install` 会完成构建、安装二进制、创建 `bash`/`zsh`/`sh` 三个 wrapper 软链，
+并准备状态和日志目录。通过 `sudo` 执行时默认读取 `SUDO_USER`，不会把目录误设为
+`root`。安装位置和运行账号可以覆盖：
+
+```bash
+sudo make install PREFIX=/opt/shelllane RUNTIME_USER=agent
+make install DESTDIR=/tmp/package-root RUNTIME_USER="$USER"
+```
+
+`make uninstall` 只删除二进制和软链，故意保留配置、用户状态及日志，避免误删数据。
 
 在接入上层应用前先检查配置和路由：
 
