@@ -106,6 +106,19 @@ The launcher, not the end user, must set the identity. If env and argv values
 disagree, ShellLane rejects the invocation. Raw values are used only for exact
 route matching; audit and filesystem paths use the digest.
 
+With `argvEnvFallback: true`, both of these launch forms resolve the same
+identity:
+
+```bash
+SHELLLANE_IDENTITY=alice /path/to/bash -lc 'agent-cli ...'
+/path/to/bash SHELLLANE_IDENTITY=alice -lc 'agent-cli ...'
+```
+
+ShellLane scans `argv[1:]`, consumes every matching metadata item, and forwards
+the remaining argv unchanged. The real Bash receives only
+`bash -lc 'agent-cli ...'`. Identity values are identifiers, not secrets; argv
+may be briefly observable in the local process list.
+
 Additional non-secret request context can use environment names such as
 `SHELLLANE_CONTEXT_REQUEST` or `SHELLLANE_CONTEXT_TENANT`. It affects execution
 only when explicitly allowlisted by a container runtime. Session IDs are not

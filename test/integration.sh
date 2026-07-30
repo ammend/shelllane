@@ -21,6 +21,24 @@ expected_home="$test_dir/state/$(printf integration-user | sha256sum | cut -d' '
 expected_config="$test_dir/state/$(printf integration-user | sha256sum | cut -d' ' -f1)/shared/config"
 test "$output" = "$expected_home|$expected_config"
 
+# Some launchers append metadata after the shell executable instead of setting
+# process environment: sh SHELLLANE_IDENTITY=value -c ...
+unset SHELLLANE_IDENTITY
+argv_output="$("$test_dir/sh" SHELLLANE_IDENTITY=argv-user -c '
+  test "$#" -eq 0
+  printf "%s|argv-ok" "$HOME"
+')"
+argv_home="$test_dir/state/$(printf argv-user | sha256sum | cut -d' ' -f1)/profiles/host/home"
+test "$argv_output" = "$argv_home|argv-ok"
+
+export SHELLLANE_IDENTITY="integration-user"
+set +e
+"$test_dir/sh" SHELLLANE_IDENTITY=conflicting-user -c 'exit 0' 2>"$test_dir/conflict.log"
+conflict_status=$?
+set -e
+test "$conflict_status" -ne 0
+grep 'identity_conflict' "$test_dir/conflict.log" >/dev/null
+
 set +e
 "$test_dir/sh" -c 'exit 37'
 status=$?

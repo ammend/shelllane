@@ -8,6 +8,8 @@ shells:
 
 identity:
   env: SHELLLANE_IDENTITY
+  # 兼容 launcher 在 bash 后追加 KEY=value 参数。
+  argvEnvFallback: true
   required: true
 
 state:

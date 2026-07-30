@@ -68,6 +68,16 @@ shelllane route test --config .configs/mixed.yaml --identity developer@example
 shelllane route test --config .configs/mixed.yaml --identity any-normal-user
 ```
 
+如果上层不是设置进程环境，而是在 Shell 可执行文件后追加变量：
+
+```text
+/usr/local/lib/shelllane/bash SHELLLANE_IDENTITY=user@example -lc 'codex ...'
+```
+
+配置中开启 `identity.argvEnvFallback: true`。ShellLane 会消费
+`SHELLLANE_IDENTITY=...`，再把剩余 argv 原样交给真实 Bash；env 与 argv 同时存在但
+值不一致时会拒绝执行。
+
 ## 身份与隔离
 
 上层应用把已经认证过的用户标识放入 `SHELLLANE_IDENTITY`。ShellLane 使用原始值做

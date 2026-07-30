@@ -9,6 +9,7 @@ shells:
 
 identity:
   env: SHELLLANE_IDENTITY
+  argvEnvFallback: true
   required: true
 
 state:

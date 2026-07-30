@@ -37,13 +37,28 @@ targets:
 ```yaml
 identity:
   env: SHELLLANE_IDENTITY
-  argvEnvFallback: false
+  argvEnvFallback: true
   required: true
 ```
 
 身份必须由已经完成认证的上层应用设置，不能直接信任外部用户提交的任意环境变量。
 env 和 argv fallback 同时存在但值不同会失败。原始身份用于精确匹配，目录和审计只用
 SHA-256。
+
+两种等价的上层调用：
+
+```bash
+# 首选：真正的进程环境
+SHELLLANE_IDENTITY=user@example /path/to/bash -lc 'codex ...'
+
+# 兼容：launcher 把 KEY=value 放在 bash 后的 argv 中
+/path/to/bash SHELLLANE_IDENTITY=user@example -lc 'codex ...'
+```
+
+第二种方式只有在 `argvEnvFallback: true` 时启用。ShellLane 扫描 `argv[1:]` 中与
+`identity.env` 同名的 `KEY=value`，完成解析后删除所有这些元数据参数，所以真实 Bash
+最终只收到 `bash -lc 'codex ...'`。身份不是 secret；argv 在 ShellLane 消费前可能被
+同机进程列表短暂看到。
 
 Session ID 不是 ShellLane 必需字段。如果上层确实要传非敏感上下文，使用
 `SHELLLANE_CONTEXT_*`，并在 runtime `passEnv` 中显式允许。
