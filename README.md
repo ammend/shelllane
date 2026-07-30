@@ -41,7 +41,7 @@ default target.
 ## Start here
 
 1. Read the [architecture and request flow](docs/architecture.md).
-2. Pick a copy-ready configuration from [`.configs/`](.configs/README.md).
+2. Pick a copy-ready template from [`configs/`](configs/README.md).
 3. Follow the [configuration reference](docs/configuration.md).
 4. Review the [security model](docs/security.md).
 
@@ -53,7 +53,9 @@ sudo ln -s /usr/local/bin/shelllane /usr/local/lib/shelllane/bash
 sudo install -d -m 0700 -o "$USER" /var/lib/shelllane/users
 sudo install -d -m 0700 -o "$USER" /var/log/shelllane
 
-export SHELLLANE_CONFIG="$PWD/.configs/local-host.yaml"
+mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/shelllane"
+cp configs/local-host.yaml \
+  "${XDG_CONFIG_HOME:-$HOME/.config}/shelllane/config.yaml"
 export SHELLLANE_IDENTITY="user@example"
 /usr/local/lib/shelllane/bash -lc 'printf "%s\n" "$HOME"'
 ```
@@ -61,10 +63,47 @@ export SHELLLANE_IDENTITY="user@example"
 Validate before deployment:
 
 ```bash
-shelllane config check --config .configs/local-host.yaml
-shelllane route test --config .configs/mixed.yaml --identity developer@example
-shelllane doctor --config .configs/mixed.yaml
+shelllane config check --config configs/local-host.yaml
+shelllane route test --config configs/mixed.yaml --identity developer@example
+shelllane doctor --config configs/mixed.yaml
 ```
+
+## Template directory vs runtime configuration
+
+`<repo>/configs/*.yaml` contains copy-ready templates. ShellLane does not use
+that repository directory as its default runtime location.
+
+The user runtime path follows the XDG Base Directory convention:
+
+```text
+$XDG_CONFIG_HOME/shelllane/config.yaml
+# or, when XDG_CONFIG_HOME is unset:
+$HOME/.config/shelllane/config.yaml
+```
+
+System services may use `/etc/shelllane/config.yaml`.
+
+## Identity appended after Bash
+
+Some launchers append metadata after the shell executable:
+
+```bash
+/path/to/bash SHELLLANE_IDENTITY=user@example -lc 'agent-cli ...'
+```
+
+Enable:
+
+```yaml
+identity:
+  env: SHELLLANE_IDENTITY
+  argvEnvFallback: true
+  required: true
+```
+
+ShellLane consumes the matching `KEY=value` item before executing the real
+Bash. The remaining argv is exactly `bash -lc 'agent-cli ...'`. If environment
+and argv identities both exist but disagree, execution fails closed with
+`identity_conflict`.
 
 ## Visual guides
 

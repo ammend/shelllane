@@ -36,13 +36,13 @@ Shell 环境。ShellLane 不处理聊天消息，不理解 prompt，也不是 Bo
 
 | 连接方式 | 运行方式 | 典型用途 | 配置 |
 | --- | --- | --- | --- |
-| local | host | 管理员、单机开发 | [`local-host.yaml`](.configs/local-host.yaml) |
-| local | container | 普通用户本机容器隔离 | [`local-docker.yaml`](.configs/local-docker.yaml) |
-| SSH | host | 团队成员自己的开发机 | [`ssh-host.yaml`](.configs/ssh-host.yaml) |
-| SSH | container | 远端工作节点容器隔离 | [`ssh-docker.yaml`](.configs/ssh-docker.yaml) |
+| local | host | 管理员、单机开发 | [`local-host.yaml`](configs/local-host.yaml) |
+| local | container | 普通用户本机容器隔离 | [`local-docker.yaml`](configs/local-docker.yaml) |
+| SSH | host | 团队成员自己的开发机 | [`ssh-host.yaml`](configs/ssh-host.yaml) |
+| SSH | container | 远端工作节点容器隔离 | [`ssh-docker.yaml`](configs/ssh-docker.yaml) |
 
 管理员、团队成员、普通用户混合路由见
-[`mixed.yaml`](.configs/mixed.yaml)。
+[`mixed.yaml`](configs/mixed.yaml)。
 
 ## 三分钟体验
 
@@ -54,7 +54,9 @@ sudo ln -s /usr/local/bin/shelllane /usr/local/lib/shelllane/bash
 sudo install -d -m 0700 -o "$USER" /var/lib/shelllane/users
 sudo install -d -m 0700 -o "$USER" /var/log/shelllane
 
-export SHELLLANE_CONFIG="$PWD/.configs/local-host.yaml"
+mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/shelllane"
+cp configs/local-host.yaml \
+  "${XDG_CONFIG_HOME:-$HOME/.config}/shelllane/config.yaml"
 export SHELLLANE_IDENTITY="user@example"
 /usr/local/lib/shelllane/bash -lc 'echo "HOME=$HOME"; pwd'
 ```
@@ -62,11 +64,35 @@ export SHELLLANE_IDENTITY="user@example"
 在接入上层应用前先检查配置和路由：
 
 ```bash
-shelllane config check --config .configs/mixed.yaml
-shelllane route test --config .configs/mixed.yaml --identity admin@example
-shelllane route test --config .configs/mixed.yaml --identity developer@example
-shelllane route test --config .configs/mixed.yaml --identity any-normal-user
+shelllane config check --config configs/mixed.yaml
+shelllane route test --config configs/mixed.yaml --identity admin@example
+shelllane route test --config configs/mixed.yaml --identity developer@example
+shelllane route test --config configs/mixed.yaml --identity any-normal-user
 ```
+
+## 仓库模板与真实配置路径
+
+这两个目录用途不同：
+
+```text
+代码仓库：<repo>/configs/*.yaml
+           只保存 local-host、SSH、Docker、mixed 等模板
+
+真实运行：$XDG_CONFIG_HOME/shelllane/config.yaml
+默认展开：$HOME/.config/shelllane/config.yaml
+系统服务：/etc/shelllane/config.yaml
+```
+
+例如用户 `liudongwei` 未设置 `XDG_CONFIG_HOME` 时，默认运行配置是：
+
+```text
+/home/liudongwei/.config/shelllane/config.yaml
+```
+
+不是 `/home/liudongwei/configs/local-host.yaml`。后者只有在仓库正好位于
+`/home/liudongwei` 时才是一个模板文件。
+
+## 上层把身份变量放在 Bash 后面时
 
 如果上层不是设置进程环境，而是在 Shell 可执行文件后追加变量：
 
@@ -113,7 +139,7 @@ PNG 在 GitHub 页面直接显示；同目录保留 Archify 交互 HTML，clone 
 
 ## 文档导航
 
-- [按场景选择配置](.configs/README.zh-CN.md)
+- [按场景选择配置](configs/README.zh-CN.md)
 - [中文配置教程](docs/zh-CN/configuration.md)
 - [完整字段参考（英文）](docs/configuration.md)
 - [中文安全模型](docs/zh-CN/security.md)

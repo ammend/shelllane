@@ -4,8 +4,18 @@ ShellLane reads one YAML file. Resolution order is:
 
 1. the path passed to `--config` for diagnostic commands;
 2. `SHELLLANE_CONFIG`;
-3. `/etc/shelllane/config.yaml`;
-4. `$HOME/.config/shelllane/config.yaml`.
+3. `$XDG_CONFIG_HOME/shelllane/config.yaml`, or
+   `$HOME/.config/shelllane/config.yaml` when XDG is unset;
+4. `/etc/shelllane/config.yaml`.
+
+The repository's `configs/` directory contains templates. It is not a runtime
+search path. Install one selected template:
+
+```bash
+mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/shelllane"
+cp configs/local-host.yaml \
+  "${XDG_CONFIG_HOME:-$HOME/.config}/shelllane/config.yaml"
+```
 
 Unknown fields, invalid references, and unsupported values are rejected. Check a
 file before deployment:
@@ -347,7 +357,7 @@ does not record raw identities or commands.
 
 ## Two-machine ordinary-user example
 
-The complete [mixed configuration](../.configs/mixed.yaml) demonstrates:
+The complete [mixed configuration](../configs/mixed.yaml) demonstrates:
 
 - named administrators running locally;
 - a named developer running on a dedicated SSH machine;

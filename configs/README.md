@@ -3,16 +3,9 @@
 Each file is a complete, strictly validated configuration rather than a partial
 snippet.
 
-The directory is hidden by convention. Select a file explicitly from the
-project root:
-
-```bash
-export SHELLLANE_CONFIG="$PWD/.configs/local-host.yaml"
-```
-
-ShellLane intentionally does not auto-load configuration from the current
-working directory: a checked-out project must not be able to redirect execution
-to an arbitrary SSH node or image without administrator intent.
+This repository directory contains templates, not the active runtime
+configuration. Copy one to `$XDG_CONFIG_HOME/shelllane/config.yaml` (normally
+`$HOME/.config/shelllane/config.yaml`) or `/etc/shelllane/config.yaml`.
 
 | File | Connector | Runtime | Use |
 | --- | --- | --- | --- |

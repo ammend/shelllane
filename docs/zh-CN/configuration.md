@@ -1,20 +1,34 @@
 # 配置教程
 
-完整可运行场景都在 [`.configs/`](../../.configs/README.zh-CN.md)。本页解释配置如何组合。
+完整可运行模板都在 [`configs/`](../../configs/README.zh-CN.md)。本页解释配置如何组合。
 逐字段类型与默认值见 [英文完整参考](../configuration.md)。
 
 ## 配置加载顺序
 
 1. 诊断命令的 `--config`；
 2. `SHELLLANE_CONFIG`；
-3. `/etc/shelllane/config.yaml`；
-4. `$HOME/.config/shelllane/config.yaml`。
+3. `$XDG_CONFIG_HOME/shelllane/config.yaml`；未设置 XDG 时为
+   `$HOME/.config/shelllane/config.yaml`；
+4. `/etc/shelllane/config.yaml`。
+
+仓库的 `configs/` 是模板目录，不是运行时自动查找目录。选择一个模板安装到 Linux
+用户配置目录：
+
+```bash
+mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/shelllane"
+cp configs/local-host.yaml \
+  "${XDG_CONFIG_HOME:-$HOME/.config}/shelllane/config.yaml"
+```
+
+因此 `/home/liudongwei/configs/local-host.yaml` 只在仓库恰好位于
+`/home/liudongwei` 时才是模板路径；正常运行路径应是
+`/home/liudongwei/.config/shelllane/config.yaml`。
 
 未知字段、错误引用和不支持的值会直接报错。部署前执行：
 
 ```bash
-shelllane config check --config .configs/mixed.yaml
-shelllane doctor --config .configs/mixed.yaml
+shelllane config check --config configs/mixed.yaml
+shelllane doctor --config configs/mixed.yaml
 ```
 
 ## 最小心智模型
@@ -82,7 +96,7 @@ routes:
 用命令查看结果，不要靠猜：
 
 ```bash
-shelllane route test --config .configs/mixed.yaml --identity arbitrary-user
+shelllane route test --config configs/mixed.yaml --identity arbitrary-user
 ```
 
 ## Node 与 SSH

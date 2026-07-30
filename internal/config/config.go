@@ -157,10 +157,11 @@ func resolvePath(explicit string) (string, error) {
 	if fromEnv := os.Getenv("SHELLLANE_CONFIG"); fromEnv != "" {
 		return expandHome(fromEnv), nil
 	}
-	candidates := []string{"/etc/shelllane/config.yaml"}
-	if current, err := user.Current(); err == nil && current.HomeDir != "" {
-		candidates = append(candidates, filepath.Join(current.HomeDir, ".config", "shelllane", "config.yaml"))
+	var candidates []string
+	if configHome, err := os.UserConfigDir(); err == nil && configHome != "" {
+		candidates = append(candidates, filepath.Join(configHome, "shelllane", "config.yaml"))
 	}
+	candidates = append(candidates, "/etc/shelllane/config.yaml")
 	for _, candidate := range candidates {
 		if _, err := os.Stat(candidate); err == nil {
 			return candidate, nil

@@ -3,15 +3,16 @@
 这里的每个 YAML 都是完整配置，可以直接执行 `shelllane config check`，不是省略关键
 字段的片段。
 
-从项目根目录显式选择配置：
+代码仓库的 `configs/` 只存模板。真实运行配置遵循 Linux XDG 规范：
 
 ```bash
-export SHELLLANE_CONFIG="$PWD/.configs/local-host.yaml"
+mkdir -p "${XDG_CONFIG_HOME:-$HOME/.config}/shelllane"
+cp configs/local-host.yaml \
+  "${XDG_CONFIG_HOME:-$HOME/.config}/shelllane/config.yaml"
 ```
 
-ShellLane 不会自动信任当前目录的 `.configs`：项目代码不应仅凭被 checkout，就能修改
-SSH 目标或运行镜像。服务部署仍应由管理员把选定配置安装到
-`/etc/shelllane/config.yaml`。
+常驻系统服务可由管理员安装到 `/etc/shelllane/config.yaml`。不要把仓库内模板路径
+误当成用户运行时路径。
 
 ## local + host
 
@@ -77,7 +78,7 @@ SSH 只是通信层；Docker 真正运行在远端机器。远端 helper 收到�
 
 ```bash
 make configs-check
-shelllane route test --config .configs/mixed.yaml --identity admin@example
-shelllane route test --config .configs/mixed.yaml --identity developer@example
-shelllane route test --config .configs/mixed.yaml --identity arbitrary-user
+shelllane route test --config configs/mixed.yaml --identity admin@example
+shelllane route test --config configs/mixed.yaml --identity developer@example
+shelllane route test --config configs/mixed.yaml --identity arbitrary-user
 ```

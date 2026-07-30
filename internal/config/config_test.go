@@ -39,6 +39,27 @@ func TestLoadValidAndDefaults(t *testing.T) {
 	}
 }
 
+func TestLoadUsesXDGConfigHome(t *testing.T) {
+	configHome := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", configHome)
+	t.Setenv("SHELLLANE_CONFIG", "")
+	path := filepath.Join(configHome, "shelllane", "config.yaml")
+	if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	content := strings.Replace(validConfig, "STATE_ROOT", filepath.Join(t.TempDir(), "state"), 1)
+	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	_, resolved, err := Load("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resolved != path {
+		t.Fatalf("resolved %q, want XDG path %q", resolved, path)
+	}
+}
+
 func TestLoadRejectsUnknownField(t *testing.T) {
 	content := strings.Replace(validConfig, "STATE_ROOT", filepath.Join(t.TempDir(), "state"), 1)
 	content += "surprise: true\n"
