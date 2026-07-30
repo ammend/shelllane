@@ -9,6 +9,12 @@ shells:
 
 identity:
   env: SHELLLANE_IDENTITY
+  # 发起端可来自不同上层应用，远端收到统一解析后的身份目录 key。
+  envMap:
+    SHELLLANE_IDENTITY:
+      - "$BOTMUX_USER_ID"
+      - "$IDE_USER_ID"
+      - "$JOB_USER_ID"
   argvEnvFallback: true
   required: true
 

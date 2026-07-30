@@ -66,6 +66,13 @@ make install DESTDIR=/tmp/package-root RUNTIME_USER="$USER"
 sudo make install CONFIG_DIR=/custom/xdg/shelllane
 ```
 
+重复安装会刷新五个具名模板，但默认保留现有 `config.yaml`。如果明确要用最新
+`local-host.yaml` 覆盖主配置：
+
+```bash
+sudo make install OVERWRITE_CONFIG=1
+```
+
 `make uninstall` 只删除二进制和软链，故意保留配置、用户状态及日志，避免误删数据。
 
 在接入上层应用前先检查配置和路由：

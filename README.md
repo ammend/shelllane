@@ -60,6 +60,13 @@ therefore preserves the active configuration. Under `sudo`, `SUDO_USER` and
 that account's HOME are used instead of `root`. If sudo's `secure_path` cannot
 find Go, the build step resolves Go from `SUDO_USER`'s login environment and
 runs the compiler as that unprivileged user.
+
+All named templates are refreshed on reinstall. The active `config.yaml` is
+preserved unless replacement is explicitly requested:
+
+```bash
+sudo make install OVERWRITE_CONFIG=1
+```
 Install locations are customizable:
 
 ```bash

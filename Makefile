@@ -7,6 +7,7 @@ DESTDIR ?=
 INSTALL ?= install
 RUNTIME_USER ?= $(if $(SUDO_USER),$(SUDO_USER),$(USER))
 CONFIG_DIR ?=
+OVERWRITE_CONFIG ?= 0
 
 .PHONY: build install install-bin install-configs install-runtime-dirs uninstall test race vet configs-check check integration docker-integration ssh-integration clean
 
@@ -55,7 +56,7 @@ install-configs:
 	for source in configs/*.yaml; do \
 		$(INSTALL) -m 0644 -o "$(RUNTIME_USER)" "$$source" "$(DESTDIR)$$config_dir/$$(basename "$$source")"; \
 	done; \
-	if test ! -e "$(DESTDIR)$$config_dir/config.yaml"; then \
+	if test "$(OVERWRITE_CONFIG)" = "1" || test ! -e "$(DESTDIR)$$config_dir/config.yaml"; then \
 		$(INSTALL) -m 0600 -o "$(RUNTIME_USER)" configs/local-host.yaml "$(DESTDIR)$$config_dir/config.yaml"; \
 	fi; \
 	echo "Installed configuration templates in $$config_dir"

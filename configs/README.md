@@ -7,6 +7,10 @@ This repository directory contains templates, not the active runtime
 configuration. Copy one to `$XDG_CONFIG_HOME/shelllane/config.yaml` (normally
 `$HOME/.config/shelllane/config.yaml`) or `/etc/shelllane/config.yaml`.
 
+All five templates demonstrate a multi-launcher `identity.envMap` list.
+`make install` refreshes named templates but preserves an existing
+`config.yaml`; use `OVERWRITE_CONFIG=1` only for an explicit reset.
+
 Templates explicitly use the default `state.identityNaming: plain`. Choose
 `base64url` for reversible path-safe encoding or `hash` when filesystem
 identity privacy matters. Changing modes requires migrating existing state.

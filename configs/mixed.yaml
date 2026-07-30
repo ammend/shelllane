@@ -11,8 +11,7 @@ shells:
 
 identity:
   env: SHELLLANE_IDENTITY
-  # ShellLane's canonical identity is populated from the variable the launcher
-  # already provides. The launcher does not need to create a new variable.
+  # 统一身份可来自多个 launcher 已有变量，上层不需要创建新变量。
   envMap:
     SHELLLANE_IDENTITY:
       - "$BOTMUX_USER_ID"

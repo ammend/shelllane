@@ -8,9 +8,12 @@ shells:
 
 identity:
   env: SHELLLANE_IDENTITY
-  # If the launcher already exports its own authenticated user variable, map it:
-  # envMap:
-  #   SHELLLANE_IDENTITY: "$UPSTREAM_USER_ID"
+  # 支持多个上层应用已有的可信身份变量；不需要上层创建统一变量。
+  envMap:
+    SHELLLANE_IDENTITY:
+      - "$BOTMUX_USER_ID"
+      - "$IDE_USER_ID"
+      - "$JOB_USER_ID"
   # 兼容 launcher 在 bash 后追加 KEY=value 参数。
   argvEnvFallback: true
   required: true

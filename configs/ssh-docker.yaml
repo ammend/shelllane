@@ -7,6 +7,12 @@ shells:
 
 identity:
   env: SHELLLANE_IDENTITY
+  # 支持 bot、IDE、任务平台等不同 launcher。
+  envMap:
+    SHELLLANE_IDENTITY:
+      - "$BOTMUX_USER_ID"
+      - "$IDE_USER_ID"
+      - "$JOB_USER_ID"
   argvEnvFallback: true
   required: true
 
