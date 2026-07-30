@@ -1,9 +1,16 @@
 # Architecture and request flow
 
-Open the interactive diagrams alongside this page:
+## System architecture
 
-- [System architecture](diagrams/shelllane-architecture.html)
-- [SSH + container request sequence](diagrams/ssh-container-sequence.html)
+![ShellLane system architecture](diagrams/shelllane-architecture.png)
+
+## SSH + container request sequence
+
+![SSH and container request sequence](diagrams/ssh-container-sequence.png)
+
+Full-size images: [architecture](diagrams/shelllane-architecture.png) and
+[sequence](diagrams/ssh-container-sequence.png). Interactive Archify HTML is
+kept in the same directory for local viewing and export.
 
 ## The boundary ShellLane owns
 

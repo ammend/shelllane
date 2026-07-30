@@ -1,6 +1,11 @@
 # Diagrams
 
-These standalone Archify HTML files work offline and include dark/light themes
+GitHub-renderable previews:
+
+- [`shelllane-architecture.png`](shelllane-architecture.png)
+- [`ssh-container-sequence.png`](ssh-container-sequence.png)
+
+The standalone Archify HTML files work offline and include dark/light themes
 plus PNG, JPEG, WebP, and SVG export:
 
 - [`shelllane-architecture.html`](shelllane-architecture.html)

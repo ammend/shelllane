@@ -30,6 +30,8 @@ ShellLane 只解决中间这一层：
 上层应用不用知道 Docker、SSH 或用户目录怎么组织；Agent CLI 也仍然只看到普通
 Shell 环境。ShellLane 不处理聊天消息，不理解 prompt，也不是 Bot 网关或 Agent 框架。
 
+![ShellLane 总体架构](docs/diagrams/shelllane-architecture.png)
+
 ## 四种直接可用的运行方式
 
 | 连接方式 | 运行方式 | 典型用途 | 配置 |
@@ -90,11 +92,14 @@ shelllane route test --config configs/mixed.yaml --identity any-normal-user
 
 ## 图解
 
-- [交互式总体架构图](docs/diagrams/shelllane-architecture.html)
-- [交互式 SSH + Docker 请求顺序图](docs/diagrams/ssh-container-sequence.html)
+![SSH + Docker 请求顺序](docs/diagrams/ssh-container-sequence.png)
+
+- [总体架构大图](docs/diagrams/shelllane-architecture.png)
+- [SSH + Docker 顺序大图](docs/diagrams/ssh-container-sequence.png)
 - [架构与请求流中文说明](docs/zh-CN/architecture.md)
 
-图由 Archify 生成，支持深浅色切换，可直接导出 PNG、JPEG、WebP、SVG。
+PNG 在 GitHub 页面直接显示；同目录保留 Archify 交互 HTML，clone 后打开可切换
+深浅色并导出 PNG、JPEG、WebP、SVG。
 
 ## 文档导航
 

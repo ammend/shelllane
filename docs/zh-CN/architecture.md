@@ -1,9 +1,16 @@
 # 架构与请求流
 
-建议同时打开：
+## 总体架构图
 
-- [交互式总体架构图](../diagrams/shelllane-architecture.html)
-- [交互式 SSH + Container 顺序图](../diagrams/ssh-container-sequence.html)
+![ShellLane 总体架构](../diagrams/shelllane-architecture.png)
+
+## SSH + Container 请求顺序图
+
+![SSH + Container 请求顺序](../diagrams/ssh-container-sequence.png)
+
+查看原始尺寸：[总体架构](../diagrams/shelllane-architecture.png)、
+[请求顺序](../diagrams/ssh-container-sequence.png)。同目录的 Archify HTML 保留给
+本地交互查看和多格式导出。
 
 ## ShellLane 负责什么
 

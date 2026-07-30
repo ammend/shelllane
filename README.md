@@ -23,6 +23,8 @@ into a small, reusable middle layer:
 
 ShellLane is not a bot gateway or Agent framework. It routes shell execution.
 
+![ShellLane architecture](docs/diagrams/shelllane-architecture.png)
+
 ## Backends
 
 | Connector | Runtime | Result |
@@ -66,11 +68,11 @@ shelllane doctor --config configs/mixed.yaml
 
 ## Visual guides
 
-- [Interactive architecture diagram](docs/diagrams/shelllane-architecture.html)
-- [Interactive SSH + container sequence](docs/diagrams/ssh-container-sequence.html)
+![SSH and container request sequence](docs/diagrams/ssh-container-sequence.png)
 
-Both Archify diagrams are standalone HTML with dark/light themes and one-click
-PNG, JPEG, WebP, and SVG export. Their maintainable JSON sources live in
+GitHub renders the PNG previews directly. The same directory also contains
+standalone interactive Archify HTML with dark/light themes and one-click
+PNG/JPEG/WebP/SVG export. Maintainable JSON sources live in
 [`docs/diagrams/source/`](docs/diagrams/source/).
 
 ## Integrations
