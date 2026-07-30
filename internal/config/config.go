@@ -205,6 +205,13 @@ func (c *Config) defaults() {
 		c.Nodes[name] = node
 	}
 	for name, runtime := range c.Runtimes {
+		if len(runtime.PassEnv) == 0 {
+			runtime.PassEnv = []string{
+				"TERM", "COLORTERM", "LANG", "LC_*", "SHELLLANE_CONTEXT_*",
+				"HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY",
+				"http_proxy", "https_proxy", "no_proxy",
+			}
+		}
 		if runtime.Type == "container" {
 			if runtime.Engine == "" {
 				runtime.Engine = "docker"
@@ -217,13 +224,6 @@ func (c *Config) defaults() {
 			}
 			if runtime.Workdir == "" {
 				runtime.Workdir = "/workspace"
-			}
-			if len(runtime.PassEnv) == 0 {
-				runtime.PassEnv = []string{
-					"TERM", "COLORTERM", "LANG", "LC_*", "SHELLLANE_CONTEXT_*",
-					"HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY",
-					"http_proxy", "https_proxy", "no_proxy",
-				}
 			}
 		}
 		if runtime.Type == "host" && runtime.Profile == "" {

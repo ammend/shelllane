@@ -47,9 +47,6 @@ func (r *Runner) ExecuteRemote(request invocation.Request) error {
 	id := identity.Identity{Hash: request.IdentityHash, Source: "remote-request"}
 	target := config.Target{Runtime: request.Runtime, StateMode: request.StateMode}
 	env := environmentMapToSlice(request.Env)
-	if len(env) == 0 {
-		env = os.Environ()
-	}
 	return r.executeLocal(runtime, target, id, request.ShellKind, request.Args, env, request.Cwd, request.RequestID, request.TTY)
 }
 
