@@ -14,7 +14,10 @@ identity:
   # ShellLane's canonical identity is populated from the variable the launcher
   # already provides. The launcher does not need to create a new variable.
   envMap:
-    SHELLLANE_IDENTITY: "$BOTMUX_USER_ID"
+    SHELLLANE_IDENTITY:
+      - "$BOTMUX_USER_ID"
+      - "$IDE_USER_ID"
+      - "$JOB_USER_ID"
   # Also accept: /path/to/bash BOTMUX_USER_ID=alice -lc 'pwd'
   argvEnvFallback: true
   required: true

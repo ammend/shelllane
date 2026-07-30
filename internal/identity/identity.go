@@ -80,12 +80,24 @@ func Resolve(cfg config.IdentityConfig, args []string, getenv func(string) strin
 // metadata removal.
 func EnvNames(cfg config.IdentityConfig) []string {
 	names := []string{cfg.Env}
-	if expression, ok := cfg.EnvMap[cfg.Env]; ok {
-		if mapped := envName(expression); mapped != "" && mapped != cfg.Env {
-			names = append(names, mapped)
+	if expressions, ok := cfg.EnvMap[cfg.Env]; ok {
+		for _, expression := range expressions {
+			mapped := envName(expression)
+			if mapped != "" && !contains(names, mapped) {
+				names = append(names, mapped)
+			}
 		}
 	}
 	return names
+}
+
+func contains(values []string, wanted string) bool {
+	for _, value := range values {
+		if value == wanted {
+			return true
+		}
+	}
+	return false
 }
 
 // ArgvEnvironment returns identity assignments carried after argv[0]. They are

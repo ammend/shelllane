@@ -52,15 +52,19 @@ targets:
 identity:
   env: SHELLLANE_IDENTITY
   envMap:
-    SHELLLANE_IDENTITY: "$BOTMUX_USER_ID"
+    SHELLLANE_IDENTITY:
+      - "$BOTMUX_USER_ID"
+      - "$IDE_USER_ID"
+      - "$JOB_USER_ID"
   argvEnvFallback: true
   required: true
 ```
 
-`env` 是 ShellLane 内部的统一身份名；`envMap` 的 key 必须与它相同，value 是
-上层已经提供的环境变量引用。这里表示读取 `BOTMUX_USER_ID`，而不是要求上层创建
-`SHELLLANE_IDENTITY`。`${BOTMUX_USER_ID}` 也可使用。映射只接受单一变量引用，不执行
-shell 展开、命令替换或字符串拼接。
+`env` 是 ShellLane 内部的统一身份名；`envMap` 的 key 必须与它相同，value 可以是
+一个变量引用，也可以是多个上层应用变量组成的有序列表。一次请求只需一个来源有值；
+多个来源值相同也接受，不同则拒绝。这里无需任何上层创建 `SHELLLANE_IDENTITY`。
+`${BOTMUX_USER_ID}` 也可使用。每一项只接受单一变量引用，不执行 shell 展开、命令替换
+或字符串拼接。
 
 身份来源必须由已经完成认证的上层应用设置，不能直接信任外部用户提交的任意环境变量。
 若 `SHELLLANE_IDENTITY` 与映射来源同时存在但值不同，会以 `identity_conflict` 失败。

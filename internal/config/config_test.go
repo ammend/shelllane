@@ -66,7 +66,7 @@ func TestValidateRejectsIdentityEnvMapExpression(t *testing.T) {
 		Version: 1,
 		Identity: IdentityConfig{
 			Env:      "SHELLLANE_IDENTITY",
-			EnvMap:   map[string]string{"SHELLLANE_IDENTITY": "$(id)"},
+			EnvMap:   map[string]StringList{"SHELLLANE_IDENTITY": {"$(id)"}},
 			Required: &required,
 			Hash:     "sha256",
 		},

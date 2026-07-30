@@ -108,12 +108,17 @@ shelllane route test --config configs/mixed.yaml --identity any-normal-user
 identity:
   env: SHELLLANE_IDENTITY
   envMap:
-    SHELLLANE_IDENTITY: "$BOTMUX_USER_ID"
+    SHELLLANE_IDENTITY:
+      - "$BOTMUX_USER_ID"
+      - "$IDE_USER_ID"
+      - "$JOB_USER_ID"
   argvEnvFallback: true
   required: true
 ```
 
-例如上游进程本来就有 `BOTMUX_USER_ID=ou_xxx`，ShellLane 会把它解析为内部统一身份
+列表按顺序声明多个可选上游。某次请求只要其中一个有值即可；多个来源值相同也接受，
+值不同则以 `identity_conflict` 拒绝。原有的单字符串写法仍兼容。例如上游进程本来就有
+`BOTMUX_USER_ID=ou_xxx`，ShellLane 会把它解析为内部统一身份
 `SHELLLANE_IDENTITY=ou_xxx`，用于路由和隔离。这个映射只发生在 ShellLane 内部，不会
 要求上游动态增加环境变量，也不会修改真实 Shell 收到的环境。若 canonical 变量和映射
 来源同时存在但值不同，ShellLane 会以 `identity_conflict` 拒绝执行。

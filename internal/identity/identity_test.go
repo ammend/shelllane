@@ -45,7 +45,7 @@ func TestResolveFromMappedEnvironment(t *testing.T) {
 	required := true
 	cfg := config.IdentityConfig{
 		Env:      "SHELLLANE_IDENTITY",
-		EnvMap:   map[string]string{"SHELLLANE_IDENTITY": "$BOTMUX_USER_ID"},
+		EnvMap:   map[string]config.StringList{"SHELLLANE_IDENTITY": {"$BOTMUX_USER_ID"}},
 		Required: &required,
 	}
 	values := map[string]string{"BOTMUX_USER_ID": "ou_alice"}
@@ -62,7 +62,7 @@ func TestResolveMappedEnvironmentConflict(t *testing.T) {
 	required := true
 	cfg := config.IdentityConfig{
 		Env:      "SHELLLANE_IDENTITY",
-		EnvMap:   map[string]string{"SHELLLANE_IDENTITY": "${BOTMUX_USER_ID}"},
+		EnvMap:   map[string]config.StringList{"SHELLLANE_IDENTITY": {"${BOTMUX_USER_ID}"}},
 		Required: &required,
 	}
 	values := map[string]string{
@@ -79,7 +79,7 @@ func TestResolveMappedArgv(t *testing.T) {
 	required := true
 	cfg := config.IdentityConfig{
 		Env:             "SHELLLANE_IDENTITY",
-		EnvMap:          map[string]string{"SHELLLANE_IDENTITY": "$BOTMUX_USER_ID"},
+		EnvMap:          map[string]config.StringList{"SHELLLANE_IDENTITY": {"$BOTMUX_USER_ID"}},
 		ArgvEnvFallback: true,
 		Required:        &required,
 	}
@@ -95,7 +95,7 @@ func TestResolveMappedArgv(t *testing.T) {
 func TestArgvEnvironmentPreservesCanonicalAndMappedNames(t *testing.T) {
 	cfg := config.IdentityConfig{
 		Env:             "SHELLLANE_IDENTITY",
-		EnvMap:          map[string]string{"SHELLLANE_IDENTITY": "$BOTMUX_USER_ID"},
+		EnvMap:          map[string]config.StringList{"SHELLLANE_IDENTITY": {"$BOTMUX_USER_ID"}},
 		ArgvEnvFallback: true,
 	}
 	got := ArgvEnvironment(cfg, []string{
@@ -103,5 +103,31 @@ func TestArgvEnvironmentPreservesCanonicalAndMappedNames(t *testing.T) {
 	})
 	if got["BOTMUX_USER_ID"] != "alice" || got["SHELLLANE_IDENTITY"] != "alice" {
 		t.Fatalf("unexpected assignments: %#v", got)
+	}
+}
+
+func TestResolveMultipleMappedSources(t *testing.T) {
+	required := true
+	cfg := config.IdentityConfig{
+		Env: "SHELLLANE_IDENTITY",
+		EnvMap: map[string]config.StringList{
+			"SHELLLANE_IDENTITY": {"$BOTMUX_USER_ID", "$IDE_USER_ID"},
+		},
+		Required: &required,
+	}
+	values := map[string]string{"IDE_USER_ID": "alice"}
+	id, err := Resolve(cfg, []string{"bash"}, func(key string) string { return values[key] })
+	if err != nil || id.Value != "alice" || id.Source != "env:IDE_USER_ID" {
+		t.Fatalf("unexpected identity: %#v, %v", id, err)
+	}
+
+	values["BOTMUX_USER_ID"] = "alice"
+	if _, err := Resolve(cfg, []string{"bash"}, func(key string) string { return values[key] }); err != nil {
+		t.Fatalf("same identity from multiple sources should be accepted: %v", err)
+	}
+
+	values["BOTMUX_USER_ID"] = "bob"
+	if _, err := Resolve(cfg, []string{"bash"}, func(key string) string { return values[key] }); !errors.Is(err, ErrConflict) {
+		t.Fatalf("different identities must conflict, got %v", err)
 	}
 }

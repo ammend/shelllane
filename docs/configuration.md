@@ -101,7 +101,10 @@ inside the image.
 identity:
   env: SHELLLANE_IDENTITY
   envMap:
-    SHELLLANE_IDENTITY: "$UPSTREAM_USER_ID"
+    SHELLLANE_IDENTITY:
+      - "$BOTMUX_USER_ID"
+      - "$IDE_USER_ID"
+      - "$JOB_USER_ID"
   argvEnvFallback: true
   required: true
   hash: sha256
@@ -110,14 +113,16 @@ identity:
 | Field | Default | Meaning |
 | --- | --- | --- |
 | `env` | `SHELLLANE_IDENTITY` | Trusted environment variable containing the upstream identity. |
-| `envMap` | none | Maps the canonical identity to an environment variable the launcher already exports, for example `SHELLLANE_IDENTITY: "$BOTMUX_USER_ID"`. |
+| `envMap` | none | Maps the canonical identity to one source string or an ordered list of variables exported by different launchers. |
 | `argvEnvFallback` | `false` | Also accept and consume canonical or mapped argv metadata, such as `SHELLLANE_IDENTITY=alice` or `UPSTREAM_USER_ID=alice`. |
 | `required` | `true` | Fail closed when no identity exists. If false, use `anonymous`. |
 | `hash` | `sha256` | Path-safe identity derivation; currently the only supported algorithm. |
 
-The launcher, not the end user, must set the identity. If env and argv values
-disagree, ShellLane rejects the invocation. Raw values are used only for exact
-route matching; audit and filesystem paths use the digest.
+The launcher, not the end user, must set the identity. One non-empty mapped
+source is enough. Multiple sources with the same value are accepted; any
+disagreement between canonical, mapped, env, or argv values is rejected. Raw
+values are used for exact route matching; audit and rendezvous routing use the
+digest, while filesystem naming follows `state.identityNaming`.
 
 With `argvEnvFallback: true`, both of these launch forms resolve the same
 identity:

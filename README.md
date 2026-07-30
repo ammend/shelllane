@@ -103,13 +103,18 @@ variable it already exports into ShellLane's canonical identity:
 identity:
   env: SHELLLANE_IDENTITY
   envMap:
-    SHELLLANE_IDENTITY: "$BOTMUX_USER_ID"
+    SHELLLANE_IDENTITY:
+      - "$BOTMUX_USER_ID"
+      - "$IDE_USER_ID"
+      - "$JOB_USER_ID"
   argvEnvFallback: true
   required: true
 ```
 
-If both variables exist and disagree, ShellLane fails closed with
-`identity_conflict`.
+The list declares alternative upstream applications in priority order. One
+non-empty source is enough; multiple equal values are accepted, while
+different values fail closed with `identity_conflict`. The original scalar
+form remains valid for one source.
 
 The mapped source name is also accepted in argv compatibility mode:
 
